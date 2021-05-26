@@ -1,0 +1,47 @@
+<method>
+
+	<name>Fingrams</name>
+
+	<reference>  
+
+		<ref>D.P. Pancho, Jose M. Alonso and J. Alcalá-Fdez, A New Fingram-based Software Tool for Visual Representation and Analysis of Fuzzy Association Rules. IEEE International Conference on Fuzzy Systems (FuzzIEEE), Hyderabad (India)</ref>
+
+	</reference>
+
+	<generalDescription>  
+
+		<type>Module to visualize Fingrams for fuzzy association rules</type>
+
+		<objective>This module generates Fingrams, thus allowing the analysis of fuzzy association rules designed with KEEL.</objective>
+
+		<howWork> This module generates the required configuration file to use an stand-alone open source software tool has been developed for creating fingrams (http://sourceforge.net/projects/fingrams/). This software produces Fingrams</howWork>
+
+		<parameterSpec>  
+
+			<param>Rules Selection -> Minimum Lift: Minimum Lift of rules to be represented graphically.</param>
+
+			<param>Fingrams Generation -> Metric: Metric used to relate rule; undirected/symmetric metric or directed/asymmetric metric.</param>
+
+			<param>Fingrams Generation -> Blank Threshold: Blank threshold represents the minimum level of rule firing by a given example.</param>
+			
+			<param>Fingrams Scaling -> Pathfinder Parameter Q: Q value used by Pathfinder to scale the network.</param>
+
+			<param>Fingrams Drawing -> Layout: Layout algorithm used; Kamada-Kawai or Fruchterman-Reingold.</param>
+		</parameterSpec>
+
+	</generalDescription>
+
+	<example>
+Problem type: Association Rules
+Methods: Alcalaetal-A and Fingrams
+Dataset: women-coa
+Parameters: default values
+
+After the execution of RunKeel.jar we can see into the experiment/results\Fingrams\TSTAlcalaetal-A folder the resultant images svg with the created Fingrams:
+
+fingramsComplete.svg includes the complete Fingram without scaling with Pathfinder.
+fingramsPathinder.svg includes the scaled Fingram.
+
+</example>
+
+</method>
