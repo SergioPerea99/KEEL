@@ -69,50 +69,51 @@ public class ID3fuzzy extends Algorithm
 	 * @param paramFile			The parameters file.
 	 * 
 	 */
-	public ID3fuzzy( String paramFile ) 
-	{
-		boolean salir = false;
-  		try 
-		{
+	public ID3fuzzy( String paramFile ){
+            try {
 
-        // starts the time 
-        long startTime = System.currentTimeMillis();
+                // starts the time 
+                long startTime = System.currentTimeMillis();
 
       		// Sets the options of the execution.
-			StreamTokenizer tokenizer = new StreamTokenizer( new BufferedReader( new FileReader( paramFile ) ) );
+		StreamTokenizer tokenizer = new StreamTokenizer( new BufferedReader( new FileReader( paramFile ) ) );
     		initTokenizer( tokenizer) ;
     		setOptions( tokenizer );
     		
     		// Initializes the dataset.
     		modelDataset = new Dataset( modelFileName, true  );
     		
+                
+                trainDataset = new Dataset( trainFileName, false  );    		    	
+                testDataset = new Dataset( testFileName, false  );
+
+                NumberOfNodes = 0;
+                NumberOfLeafs = 0;
+                
     		/*check if there are continous attributes*/
     		if(Attributes.hasRealAttributes() || Attributes.hasIntegerAttributes())
     		{
-    			System.err.println("ID3fuzzy can only handle nominal attributes." );
-    			//System.exit(-1);
-    			salir = true;
+                    //En caso de tener atributos continuos, aplicar la parte del fuzzificador
+                    //1. Crear las etiquetas de las variables, de forma x-distribuida con la función de pertenencia triangular.
+                    BaseD baseD = new BaseD(3,3); 
+    			
     		}
-    		if (!salir){
-	    		trainDataset = new Dataset( trainFileName, false  );    		    	
-	    		testDataset = new Dataset( testFileName, false  );
-	          
-		        NumberOfNodes = 0;
-		        NumberOfLeafs = 0;
-	       		
-	    		// Executes the algorithm.
-	    		generateTree();
-	    		
-	    		// Prints the results generates by the algorithm.
-	    		printTrain();
-				printTest();
-				printResult();
-			}
+    		
+                else
+                {
+                    // Executes the algorithm.
+                    generateTree();
+
+                    // Prints the results generates by the algorithm.
+                    printTrain();
+                    printTest();
+                    printResult();
+		}
 	    } 
-  		catch ( Exception e ) 
-		{
-  			System.err.println( e.getMessage() );
-  			System.exit(-1);
+            catch ( Exception e ) 
+            {
+                System.err.println( e.getMessage() );
+                System.exit(-1);
 	    }
 	}
 	
