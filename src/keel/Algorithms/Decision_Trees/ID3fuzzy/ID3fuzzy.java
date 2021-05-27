@@ -97,16 +97,18 @@ public class ID3fuzzy extends Algorithm
                     System.out.println("HE LLEGADO HASTA AQUI 1");
                     
                     //En caso de tener atributos continuos, aplicar la parte del fuzzificador
+                    
+
                     //1. Crear las etiquetas de las variables, de forma x-distribuida con la función de pertenencia triangular.
-                    BaseD baseD = new BaseD(3, modelDataset); //TODO: HACER QUE ESE 3 (3 ETIQUETAS) SE INDIQUE DESDE EL FICHERO DE CONFIGURACIÓN
-                    baseD.Semantica(); //Crea las N etiquetas por los M atributos de forma x-distribuida.
+                    BaseD baseD = new BaseD(5, modelDataset); //TODO: HACER QUE ESE 3 (3 ETIQUETAS) SE INDIQUE DESDE EL FICHERO DE CONFIGURACIÓN
+                    baseD.Semantica(modelDataset); //Crea las N etiquetas por los M atributos de forma x-distribuida.
                     
                     //Para cada casilla de la matriz baseD.BaseDatos existe un Difuso que indica sus puntos importantes.
-                    for (int i = 0; i < baseD.n_variables; i++){
-                        for (int j = 0; j < baseD.n_etiquetas; j++){
-                            System.out.println(baseD.BaseDatos[i][j].Nombre+"_"+baseD.BaseDatos[i][j].Etiqueta+" :: {"+baseD.BaseDatos[i][j].x0+", "+baseD.BaseDatos[i][j].x1+", "+baseD.BaseDatos[i][j].x2+", "+baseD.BaseDatos[i][j].x3+" }");
-                        }
-                    }
+                    System.out.println(baseD.toString(modelDataset));
+                    
+                    
+                    //2. Recorrer las tuplas de datos del DATASET e ir rellenando el grado de pertenencia de dicho valor para cada una de las etiquetas respecto a su variable.
+                    
                     
     		}
     		
@@ -715,6 +717,26 @@ public class ID3fuzzy extends Algorithm
    			System.err.println( "Can not open the training output file." );
    		}
 	}
+        
+        
+        //MÉTODOS NECESARIOS PARA LA FUZZIFICACIÓN DEL ID3.
+        
+        public double Fuzzifica(double X, Difuso D) {
+            /* If X are not in the rank D, the degree is 0 */
+            if ((X < D.x0) || (X > D.x3)) {
+                return (0);
+            }
+            if (X < D.x1) {
+                return ((X - D.x0) * (D.y / (D.x1 - D.x0)));
+            }
+            if (X > D.x2) {
+                return ((D.x3 - X) * (D.y / (D.x3 - D.x2)));
+            }
+
+            return (D.y);
+        }
+        
+        
   
 	/** Main function.
 	 * 
@@ -729,5 +751,11 @@ public class ID3fuzzy extends Algorithm
 			ID3fuzzy id3fuzzy = new ID3fuzzy( args[0] );
 		}
    	}
+        
+        
+        
+        
+        
+        
    	
 }//id3fuzzy

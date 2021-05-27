@@ -63,30 +63,51 @@ public class BaseD {
     /**
      * Método encargado de crear las etiquetas de forma x-distribuida.
      */
-    public void Semantica() {
+    public void Semantica(Dataset dataset) {
         int var, etq;
         double marca, valor;
         double[] punto = new double[3];
         double[] punto_medio = new double[2];
         
         /* we generate the fuzzy partitions of the variables */
+        Attribute a1;
         for (var = 0; var < n_variables; var++) {
-            marca = (extremos[var].max - extremos[var].min) /
-                    ((double) n_etiquetas - 1);
-            for (etq = 0; etq < n_etiquetas; etq++) {
-                valor = extremos[var].min + marca * (etq - 1);
-                BaseDatos[var][etq].x0 = Asigna(valor, extremos[var].max);
-                valor = extremos[var].min + marca * etq;
-                BaseDatos[var][etq].x1 = Asigna(valor, extremos[var].max);
-                BaseDatos[var][etq].x2 = BaseDatos[var][etq].x1;
-                valor = extremos[var].min + marca * (etq + 1);
-                BaseDatos[var][etq].x3 = Asigna(valor, extremos[var].max);
-                BaseDatos[var][etq].y = 1;
-                BaseDatos[var][etq].Nombre = "V" + (var + 1);
-                BaseDatos[var][etq].Etiqueta = "E" + (etq + 1);
-                System.out.println(BaseDatos[var][etq].Nombre+"_"+BaseDatos[var][etq].Etiqueta+" = {"+BaseDatos[var][etq].x0+", "+BaseDatos[var][etq].x1+", "+ BaseDatos[var][etq].x2 +", "+ BaseDatos[var][etq].x3 +"}");
+            
+            a1 = (Attribute)dataset.attributes.get(var);
+            
+            if (a1.isContinuous()){
+                marca = (extremos[var].max - extremos[var].min) /
+                        ((double) n_etiquetas - 1);
+                for (etq = 0; etq < n_etiquetas; etq++) {
+                    valor = extremos[var].min + marca * (etq - 1);
+                    BaseDatos[var][etq].x0 = Asigna(valor, extremos[var].max);
+                    valor = extremos[var].min + marca * etq;
+                    BaseDatos[var][etq].x1 = Asigna(valor, extremos[var].max);
+                    BaseDatos[var][etq].x2 = BaseDatos[var][etq].x1;
+                    valor = extremos[var].min + marca * (etq + 1);
+                    BaseDatos[var][etq].x3 = Asigna(valor, extremos[var].max);
+                    BaseDatos[var][etq].y = 1;
+                    BaseDatos[var][etq].Nombre = "V" + (var + 1);
+                    BaseDatos[var][etq].Etiqueta = "E" + (etq + 1);
+                }
             }
         }
         System.out.println("HE LLEGADO HASTA AQUI 5");
+    }
+    
+    
+    
+    
+    public String toString(Dataset dataset){
+        String result = "";
+        Attribute a1;
+        for (int var = 0; var < n_variables; var++){
+            a1 = (Attribute)dataset.attributes.get(var);
+            if (a1.isContinuous()){
+                for (int etq = 0; etq < n_etiquetas; etq++)
+                    result += BaseDatos[var][etq].Nombre+"_"+BaseDatos[var][etq].Etiqueta+" = {"+BaseDatos[var][etq].x0+", "+BaseDatos[var][etq].x1+", "+ BaseDatos[var][etq].x2 +", "+ BaseDatos[var][etq].x3 +"}\n";
+            }
+        }
+        return result;
     }
 }
