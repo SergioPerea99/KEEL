@@ -113,7 +113,7 @@ public class ID3fuzzy extends Algorithm
                     
                     
                     //3. Cálculo de la ENTROPÍA 
-                    calcularEntropia(modelDataset);
+                    calcularEntropia();
                     
                     
     		}
@@ -755,16 +755,29 @@ public class ID3fuzzy extends Algorithm
     
     }
 
-    private void calcularEntropia(Dataset dataset) {
+    private void calcularEntropia() {
         //1. Recorrer los valores que hay en las instancias de la variable CLASE. Así saber cuántos hay de cada uno.
+        Vector valores_clase = contador_valores_clase();
+        
+        //2. Cálculo de la ENTROPÍA GENERAL.
+        double entropia_general = calcularEntropia_general(valores_clase);
+        
+        System.out.println("HE LLEGADO HASTA AQUI 7");
+        
+        //3. Por cada VARIABLE, para sus correspondientes ETIQUETAS --> Calcular su Entropía.
+        
+        
+    }
+    
+    
+    
+    private Vector contador_valores_clase(){
         Vector valores_clase = new Vector();
-        for (int i = 0; i < dataset.numClasses(); i++){
-            String valor_atributo = dataset.getClassAttribute().value(i);
+        for (int i = 0; i < modelDataset.numClasses(); i++){
+            String valor_atributo = modelDataset.getClassAttribute().value(i);
             valores_clase.addElement(new Pair(valor_atributo,0));
             System.out.println(valores_clase.get(i));
         }
-        
-        System.out.println("HE LLEGADO HASTA AQUI 7");
         
         for (int i = 0; i < modelDataset.IS.getNumInstances(); i++) { //Por cada instancia...
             String tupla = modelDataset.IS.getInstances()[i].toString();
@@ -779,15 +792,33 @@ public class ID3fuzzy extends Algorithm
             
         }
         
-        System.out.println("");
-        System.out.println("Archivo "+dataset.getName()+" con "+dataset.numClasses()+" : ");
+        
+        
+        /*System.out.println("");
+        System.out.println("Archivo "+modelDataset.getName()+" con "+modelDataset.numClasses()+" : ");
         for (int j = 0; j < valores_clase.size(); j++){
             Pair<String,Integer> par = (Pair<String, Integer>)valores_clase.get(j);
-            System.out.println("{"+par.getKey()+", "+par.getValue()+" de "+dataset.IS.getNumInstances()+"}");
+            System.out.println("{"+par.getKey()+", "+par.getValue()+" de "+modelDataset.IS.getNumInstances()+"}");
+        }*/
+        
+        return valores_clase;
+    }   
+    
+    
+    private double calcularEntropia_general(Vector valores_clase){
+        double entropia_general = 0.0;
+        for (int i = 0; i < modelDataset.numClasses(); i++){
+            Pair<String,Integer> par = (Pair<String, Integer>)valores_clase.get(i);
+            entropia_general -= ((double)par.getValue()/(double)modelDataset.IS.getNumInstances()) * log2((double)par.getValue()/(double)modelDataset.IS.getNumInstances());
         }
-        
-        
+        System.out.println("ENTROPIA GENERAL = "+entropia_general);
+        return entropia_general;
     }
 
    	
+    
+    private static double log2(double x){
+        return (double) (Math.log(x) / Math.log(2));
+    }
+    
 }//id3fuzzy
