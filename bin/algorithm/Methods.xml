@@ -3849,8 +3849,8 @@
     <jar_file>ID3fuzzy.jar</jar_file>
     <problem_type>classification</problem_type>
     <input>
-      <continuous>No</continuous>
-      <integer>No</integer>
+      <continuous>Yes</continuous>
+      <integer>Yes</integer>
       <nominal>Yes</nominal>
       <missing>Yes</missing>
       <imprecise>No</imprecise>
@@ -3869,6 +3869,7 @@
     <multiinstance>No</multiinstance> 
 	</output>
   </method>
+
 
   <method>	
     <name>FuzzyKNN-C</name>

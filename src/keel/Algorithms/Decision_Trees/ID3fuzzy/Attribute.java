@@ -83,6 +83,8 @@ public class Attribute
   		values = null;
   		type = CONTINUOUS;
   		used = false;
+                
+                
 	}
 
   	/** Constructor for discret attributes.

@@ -12,35 +12,38 @@ package keel.Algorithms.Decision_Trees.ID3fuzzy;
 public class BaseD {
     public Difuso[][] BaseDatos;
     public int n_variables;
-    public int[] n_etiquetas;
+    public int n_etiquetas;
 
     public TipoIntervalo[] extremos;
     public TipoIntervalo[][] intervalos;
 
 
-    public BaseD(int MaxEtiquetas, int n_var) {
+    public BaseD(int MaxEtiquetas, Dataset dataset) {
         int i, j;
-
-        n_variables = n_var;
-
-        intervalos = new TipoIntervalo[n_variables][MaxEtiquetas];
-        BaseDatos = new Difuso[n_variables][MaxEtiquetas];
-
+        
+        //Se inicializan...
+        n_variables = dataset.numAttributes(); //El número de variables (sin contar variable CLASE --> CAMBIAR)
+        BaseDatos = new Difuso[n_variables][MaxEtiquetas]; //Los "triangulos" que marcan la función de pertenencia de cada etiqueta de una variable.
+        
+        Attribute a1;
         for (i = 0; i < n_variables; i++) {
             BaseDatos[i] = new Difuso[MaxEtiquetas];
-            intervalos[i] = new TipoIntervalo[MaxEtiquetas];
             for (j = 0; j < MaxEtiquetas; j++) {
-                BaseDatos[i][j] = new Difuso();
-                intervalos[i][j] = new TipoIntervalo();
+                BaseDatos[i][j] = new Difuso(); //Para cada etiqueta de cada variable se crea un Difuso por defecto (Es decir, sin nada). 
+                
             }
         }
-
-        n_etiquetas = new int[n_variables];
+        System.out.println("HE LLEGADO HASTA AQUI 2");
+        n_etiquetas = MaxEtiquetas;
 
         extremos = new TipoIntervalo[n_variables];
         for (i = 0; i < n_variables; i++) {
-            extremos[i] = new TipoIntervalo();
+            a1 = (Attribute)dataset.attributes.get(i);
+            if (a1.isContinuous())
+                extremos[i] = new TipoIntervalo((double)a1.getMinRange(), (double)a1.getMaxRange());
         }
+        
+        System.out.println("HE LLEGADO HASTA AQUI 3");
     }
 
 
@@ -65,12 +68,12 @@ public class BaseD {
         double marca, valor;
         double[] punto = new double[3];
         double[] punto_medio = new double[2];
-
+        
         /* we generate the fuzzy partitions of the variables */
         for (var = 0; var < n_variables; var++) {
             marca = (extremos[var].max - extremos[var].min) /
-                    ((double) n_etiquetas[var] - 1);
-            for (etq = 0; etq < n_etiquetas[var]; etq++) {
+                    ((double) n_etiquetas - 1);
+            for (etq = 0; etq < n_etiquetas; etq++) {
                 valor = extremos[var].min + marca * (etq - 1);
                 BaseDatos[var][etq].x0 = Asigna(valor, extremos[var].max);
                 valor = extremos[var].min + marca * etq;
@@ -81,7 +84,9 @@ public class BaseD {
                 BaseDatos[var][etq].y = 1;
                 BaseDatos[var][etq].Nombre = "V" + (var + 1);
                 BaseDatos[var][etq].Etiqueta = "E" + (etq + 1);
+                System.out.println(BaseDatos[var][etq].Nombre+"_"+BaseDatos[var][etq].Etiqueta+" = {"+BaseDatos[var][etq].x0+", "+BaseDatos[var][etq].x1+", "+ BaseDatos[var][etq].x2 +", "+ BaseDatos[var][etq].x3 +"}");
             }
         }
+        System.out.println("HE LLEGADO HASTA AQUI 5");
     }
 }

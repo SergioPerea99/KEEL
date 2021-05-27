@@ -392,13 +392,13 @@
     <multiinstance>No</multiinstance>
   </dataset>
   <dataset>
-    <nameAbr>zoo-10-folds</nameAbr>
-    <nameComplete>zoo-10-folds</nameComplete>
+    <nameAbr>iris-10</nameAbr>
+    <nameComplete>iris-10</nameComplete>
     <problemType>Classification</problemType>
     <partitions>
       <partition>10cfv</partition>
     </partitions>
-    <continuous>No</continuous>
+    <continuous>Yes</continuous>
     <integer>No</integer>
     <nominal>Yes</nominal>
     <imprecise>No</imprecise>
@@ -406,9 +406,9 @@
     <percMissingValues>0.0</percMissingValues>
     <multioutput>No</multioutput>
     <multiclass>Yes</multiclass>
-    <nAttributes>17</nAttributes>
-    <nInstances>101</nInstances>
-    <nClasses>7</nClasses>
+    <nAttributes>5</nAttributes>
+    <nInstances>150</nInstances>
+    <nClasses>3</nClasses>
     <field>Real</field>
     <userDataset />
   </dataset>

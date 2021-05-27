@@ -84,6 +84,7 @@ public class ID3fuzzy extends Algorithm
     		modelDataset = new Dataset( modelFileName, true  );
     		
                 
+                
                 trainDataset = new Dataset( trainFileName, false  );    		    	
                 testDataset = new Dataset( testFileName, false  );
 
@@ -93,14 +94,25 @@ public class ID3fuzzy extends Algorithm
     		/*check if there are continous attributes*/
     		if(Attributes.hasRealAttributes() || Attributes.hasIntegerAttributes())
     		{
+                    System.out.println("HE LLEGADO HASTA AQUI 1");
+                    
                     //En caso de tener atributos continuos, aplicar la parte del fuzzificador
                     //1. Crear las etiquetas de las variables, de forma x-distribuida con la función de pertenencia triangular.
-                    BaseD baseD = new BaseD(3,3); 
-    			
+                    BaseD baseD = new BaseD(3, modelDataset); //TODO: HACER QUE ESE 3 (3 ETIQUETAS) SE INDIQUE DESDE EL FICHERO DE CONFIGURACIÓN
+                    baseD.Semantica(); //Crea las N etiquetas por los M atributos de forma x-distribuida.
+                    
+                    //Para cada casilla de la matriz baseD.BaseDatos existe un Difuso que indica sus puntos importantes.
+                    for (int i = 0; i < baseD.n_variables; i++){
+                        for (int j = 0; j < baseD.n_etiquetas; j++){
+                            System.out.println(baseD.BaseDatos[i][j].Nombre+"_"+baseD.BaseDatos[i][j].Etiqueta+" :: {"+baseD.BaseDatos[i][j].x0+", "+baseD.BaseDatos[i][j].x1+", "+baseD.BaseDatos[i][j].x2+", "+baseD.BaseDatos[i][j].x3+" }");
+                        }
+                    }
+                    
     		}
     		
                 else
                 {
+                    
                     // Executes the algorithm.
                     generateTree();
 

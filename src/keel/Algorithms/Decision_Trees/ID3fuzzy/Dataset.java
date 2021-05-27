@@ -154,7 +154,7 @@ public class Dataset
   			if(at.getType()==2)
   			{
   			 float min = (float) at.getMinAttribute();
-  			 float max = (float) at.getMinAttribute();
+  			 float max = (float) at.getMaxAttribute();
   			 attributes.addElement( new Attribute( attributeName, j ) );
  			 Attribute att = (Attribute)attributes.elementAt( j );
 			 att.setRange( min, max );  	
@@ -165,7 +165,7 @@ public class Dataset
   			 if(at.getType()==1) // check if it is integer
   			 {	
   			 	int min = (int) at.getMinAttribute();
-  			 	int max = (int) at.getMinAttribute();  			 	  			 	  			 	
+  			 	int max = (int) at.getMaxAttribute();  			 	  			 	  			 	
   			 	attributes.addElement( new Attribute( attributeName, j ) );
   			 	Attribute att = (Attribute)attributes.elementAt( j );
   			 	att.setRange( min, max );  	

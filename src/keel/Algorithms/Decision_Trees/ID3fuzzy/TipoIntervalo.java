@@ -13,4 +13,10 @@ public class TipoIntervalo {
     /* Each interval type has this form */
     public double min;
     public double max;
+    
+    
+    public TipoIntervalo(double _min, double _max){
+        min = _min;
+        max = _max;
+    }
 }
