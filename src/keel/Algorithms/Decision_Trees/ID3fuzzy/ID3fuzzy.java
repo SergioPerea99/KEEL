@@ -41,6 +41,7 @@ import java.io.*;
 import java.util.*;
 
 import keel.Dataset.Attributes;
+import keel.Dataset.Instance;
 
 
 
@@ -104,11 +105,20 @@ public class ID3fuzzy extends Algorithm
                     baseD.Semantica(modelDataset); //Crea las N etiquetas por los M atributos de forma x-distribuida.
                     
                     //Para cada casilla de la matriz baseD.BaseDatos existe un Difuso que indica sus puntos importantes.
-                    System.out.println(baseD.toString(modelDataset));
+                    System.out.println(baseD.toStringBD(modelDataset));
                     
                     
                     //2. Recorrer las tuplas de datos del DATASET e ir rellenando el grado de pertenencia de dicho valor para cada una de las etiquetas respecto a su variable.
+                    //Se recorre el vector de atributos que tiene el DATASET, el cual almacena un vector de VALORES.
+                    //Para cada valor de un atributo concreto, se rellena los grados de pertenencia para sus etiquetas.
                     
+                    //Muestra las instancias del dataset
+                    /*for (int j = 0; j < modelDataset.IS.getNumInstances(); j++){
+                        System.out.println(modelDataset.IS.getInstances()[j]);
+                    }*/
+                    
+                    gradosDePertenencia(baseD);
+                    System.out.println(baseD.toStringGradoPert());
                     
     		}
     		
@@ -719,24 +729,6 @@ public class ID3fuzzy extends Algorithm
 	}
         
         
-        //MÉTODOS NECESARIOS PARA LA FUZZIFICACIÓN DEL ID3.
-        
-        public double Fuzzifica(double X, Difuso D) {
-            /* If X are not in the rank D, the degree is 0 */
-            if ((X < D.x0) || (X > D.x3)) {
-                return (0);
-            }
-            if (X < D.x1) {
-                return ((X - D.x0) * (D.y / (D.x1 - D.x0)));
-            }
-            if (X > D.x2) {
-                return ((D.x3 - X) * (D.y / (D.x3 - D.x2)));
-            }
-
-            return (D.y);
-        }
-        
-        
   
 	/** Main function.
 	 * 
@@ -751,11 +743,21 @@ public class ID3fuzzy extends Algorithm
 			ID3fuzzy id3fuzzy = new ID3fuzzy( args[0] );
 		}
    	}
-        
-        
-        
-        
-        
-        
+
+    private void gradosDePertenencia(BaseD baseD) {
+        //Para cada instancia (tupla de datos del dataset)...
+        double valor_variable;
+        for (int i = 0; i < modelDataset.IS.getNumInstances(); i++) {
+            String tupla = modelDataset.IS.getInstances()[i].toString();
+            String[] partes_tupla = tupla.split(",");
+            for (int j = 0; j < partes_tupla.length-1; j++){ //Todas las partes menos la de la clase
+                //Tiene que haber tantas como variables (no clase)...
+                valor_variable = Double.parseDouble(partes_tupla[j]);
+                baseD.calcularGradosPertenencia(i, j, valor_variable);//Pasar el índice de la variable y su valor.
+            }
+        }
+    
+    }
+
    	
 }//id3fuzzy

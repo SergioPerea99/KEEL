@@ -5,6 +5,8 @@
  */
 package keel.Algorithms.Decision_Trees.ID3fuzzy;
 
+import java.util.Vector;
+
 /**
  *
  * @author Lenovo
@@ -16,6 +18,8 @@ public class BaseD {
 
     public TipoIntervalo[] extremos;
     public TipoIntervalo[][] intervalos;
+    
+    public Vector<double[][]> gradosPertenencia;
 
 
     public BaseD(int MaxEtiquetas, Dataset dataset) {
@@ -25,14 +29,25 @@ public class BaseD {
         n_variables = dataset.numAttributes(); //El número de variables (sin contar variable CLASE --> CAMBIAR)
         BaseDatos = new Difuso[n_variables][MaxEtiquetas]; //Los "triangulos" que marcan la función de pertenencia de cada etiqueta de una variable.
         
+        gradosPertenencia = new Vector();
+        for (i = 0; i < dataset.IS.getNumInstances(); i++){
+            gradosPertenencia.addElement(new double[n_variables][MaxEtiquetas]);
+            for (j = 0; j < n_variables; j++){
+              gradosPertenencia.get(i)[j] = new double[MaxEtiquetas]; 
+              for (int k = 0; k < MaxEtiquetas; k++){
+                  gradosPertenencia.get(i)[j][k] = 0.0; //Inicializado a 0, por si no se recorren todos a la hora de calcular los grados...
+              }
+            }
+        }
+           
+        
         Attribute a1;
         for (i = 0; i < n_variables; i++) {
             BaseDatos[i] = new Difuso[MaxEtiquetas];
-            for (j = 0; j < MaxEtiquetas; j++) {
+            for (j = 0; j < MaxEtiquetas; j++)
                 BaseDatos[i][j] = new Difuso(); //Para cada etiqueta de cada variable se crea un Difuso por defecto (Es decir, sin nada). 
-                
-            }
         }
+        
         System.out.println("HE LLEGADO HASTA AQUI 2");
         n_etiquetas = MaxEtiquetas;
 
@@ -97,8 +112,23 @@ public class BaseD {
     
     
     
+    public void calcularGradosPertenencia(int instancia, int var, double valor_dato){
+        boolean salir = false;
+        
+        for(int i = 0; i < gradosPertenencia.get(instancia)[var].length && !salir; i++){ //Recorre las etiquetas de la variable "var"
+            gradosPertenencia.get(instancia)[var][i] = BaseDatos[var][i].Fuzzifica(valor_dato);
+            if (gradosPertenencia.get(instancia)[var][i] > 0.0 && i < gradosPertenencia.get(instancia)[var].length-1){
+                gradosPertenencia.get(instancia)[var][i+1] = 1 - gradosPertenencia.get(instancia)[var][i]; //Sabiendo que son x-distribuidas, la continua a ella es 1-grado_pertenencia
+                salir = true; //Los demás se quedan con su valor por defecto, el es 0.0 que es el que les corresponderá.
+                //System.out.println("VARIABLE "+var+" --> "+valor_dato+" ::::: {etiqueta"+i+" = "+gradosPertenencia[var][i]+"etiqueta"+(i+1)+" = "+gradosPertenencia[var][i+1]+"}");
+            }
+        }
+        
+    }
     
-    public String toString(Dataset dataset){
+    
+    
+    public String toStringBD(Dataset dataset){
         String result = "";
         Attribute a1;
         for (int var = 0; var < n_variables; var++){
@@ -107,6 +137,22 @@ public class BaseD {
                 for (int etq = 0; etq < n_etiquetas; etq++)
                     result += BaseDatos[var][etq].Nombre+"_"+BaseDatos[var][etq].Etiqueta+" = {"+BaseDatos[var][etq].x0+", "+BaseDatos[var][etq].x1+", "+ BaseDatos[var][etq].x2 +", "+ BaseDatos[var][etq].x3 +"}\n";
             }
+        }
+        return result;
+    }
+    
+    
+    public String toStringGradoPert(){
+        String result = "";
+        for (int ins = 0; ins < gradosPertenencia.size(); ins++){
+            result += "INSTANCIA nº"+ins+":\n";
+            for (int var = 0; var < n_variables; var++){
+                result += "Variable "+var+" -> ";
+                for (int etq = 0; etq < n_etiquetas; etq++)
+                    result += gradosPertenencia.get(ins)[var][etq]+" ";
+                result += "\n";
+            }
+            result += "\n";
         }
         return result;
     }

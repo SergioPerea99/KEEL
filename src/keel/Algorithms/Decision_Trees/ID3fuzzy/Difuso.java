@@ -15,4 +15,21 @@ public class Difuso {
     public String Nombre, Etiqueta;
     
     
+    //MÉTODOS NECESARIOS PARA LA FUZZIFICACIÓN DEL ID3.
+        
+    public double Fuzzifica(double X) {
+        /* If X are not in the rank D, the degree is 0 */
+        if ((X < x0) || (X > x3)) {
+            return (0);
+        }
+        if (X < x1) {
+            return ((X - x0) * (y / (x1 - x0)));
+        }
+        if (X > x2) {
+            return ((x3 - X) * (y / (x3 - x2)));
+        }
+
+        return (y);
+    }
+    
 }
