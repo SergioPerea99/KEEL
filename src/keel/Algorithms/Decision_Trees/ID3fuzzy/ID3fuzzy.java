@@ -39,9 +39,9 @@
 package keel.Algorithms.Decision_Trees.ID3fuzzy;
 import java.io.*;
 import java.util.*;
+import javafx.util.Pair;
 
 import keel.Dataset.Attributes;
-import keel.Dataset.Instance;
 
 
 
@@ -103,22 +103,18 @@ public class ID3fuzzy extends Algorithm
                     //1. Crear las etiquetas de las variables, de forma x-distribuida con la función de pertenencia triangular.
                     BaseD baseD = new BaseD(5, modelDataset); //TODO: HACER QUE ESE 3 (3 ETIQUETAS) SE INDIQUE DESDE EL FICHERO DE CONFIGURACIÓN
                     baseD.Semantica(modelDataset); //Crea las N etiquetas por los M atributos de forma x-distribuida.
-                    
-                    //Para cada casilla de la matriz baseD.BaseDatos existe un Difuso que indica sus puntos importantes.
-                    System.out.println(baseD.toStringBD(modelDataset));
+                    //System.out.println(baseD.toStringBD(modelDataset));
                     
                     
-                    //2. Recorrer las tuplas de datos del DATASET e ir rellenando el grado de pertenencia de dicho valor para cada una de las etiquetas respecto a su variable.
-                    //Se recorre el vector de atributos que tiene el DATASET, el cual almacena un vector de VALORES.
-                    //Para cada valor de un atributo concreto, se rellena los grados de pertenencia para sus etiquetas.
-                    
-                    //Muestra las instancias del dataset
-                    /*for (int j = 0; j < modelDataset.IS.getNumInstances(); j++){
-                        System.out.println(modelDataset.IS.getInstances()[j]);
-                    }*/
-                    
+                    //2. Recorrer las instancias de datos del DATASET e ir rellenando el grado de pertenencia de dicho valor para cada una de las etiquetas respecto a su variable.
                     gradosDePertenencia(baseD);
-                    System.out.println(baseD.toStringGradoPert());
+                    //System.out.println(baseD.toStringGradoPert());
+                    System.out.println("HE LLEGADO HASTA AQUI 6");
+                    
+                    
+                    //3. Cálculo de la ENTROPÍA 
+                    calcularEntropia(modelDataset);
+                    
                     
     		}
     		
@@ -757,6 +753,40 @@ public class ID3fuzzy extends Algorithm
             }
         }
     
+    }
+
+    private void calcularEntropia(Dataset dataset) {
+        //1. Recorrer los valores que hay en las instancias de la variable CLASE. Así saber cuántos hay de cada uno.
+        Vector valores_clase = new Vector();
+        for (int i = 0; i < dataset.numClasses(); i++){
+            String valor_atributo = dataset.getClassAttribute().value(i);
+            valores_clase.addElement(new Pair(valor_atributo,0));
+            System.out.println(valores_clase.get(i));
+        }
+        
+        System.out.println("HE LLEGADO HASTA AQUI 7");
+        
+        for (int i = 0; i < modelDataset.IS.getNumInstances(); i++) { //Por cada instancia...
+            String tupla = modelDataset.IS.getInstances()[i].toString();
+            String[] partes_tupla = tupla.split(",");
+            
+            for (int j = 0; j < valores_clase.size(); j++){
+                Pair<String,Integer> par = (Pair<String, Integer>)valores_clase.get(j);
+                if (partes_tupla[partes_tupla.length-1].equals(par.getKey()) ) //Comprobar si son el mismo valor de clase...
+                    valores_clase.set(j, new Pair(par.getKey(), par.getValue()+1));
+                
+            }
+            
+        }
+        
+        System.out.println("");
+        System.out.println("Archivo "+dataset.getName()+" con "+dataset.numClasses()+" : ");
+        for (int j = 0; j < valores_clase.size(); j++){
+            Pair<String,Integer> par = (Pair<String, Integer>)valores_clase.get(j);
+            System.out.println("{"+par.getKey()+", "+par.getValue()+" de "+dataset.IS.getNumInstances()+"}");
+        }
+        
+        
     }
 
    	

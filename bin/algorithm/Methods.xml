@@ -3842,7 +3842,6 @@
 	</output>
   </method>
 
-
   <method>
     <name>ID3fuzzy-C</name>
     <family>Decision Trees</family>
