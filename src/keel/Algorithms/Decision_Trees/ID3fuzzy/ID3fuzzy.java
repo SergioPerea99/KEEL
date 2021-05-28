@@ -774,20 +774,16 @@ public class ID3fuzzy extends Algorithm
         //2. Cálculo de la ENTROPÍA GENERAL.
         double entropia_general = calcularEntropia_general(valores_clase);
         
-        System.out.println("HE LLEGADO HASTA AQUI 7");
         
         //3. Por cada VARIABLE, para sus correspondientes ETIQUETAS --> Calcular su Entropía.
-        System.out.println(baseD.toStringGradoPert());
         baseD.calcularSumatoriaGradosPertenencia(); //Calcular sumatoria de grados de pertenencia de cada variable-etiqueta 
         
+        System.out.println("HE LLEGADO HASTA AQUI 7");
         
-        
-        /*int index_var_clase = modelDataset.numAttributes()-1;
-        for (int var = 0; var < modelDataset.numAttributes()-1; var++){
-            for (int etq = 0; etq < NumberOfLabs; etq++){
-                
-            }
-        }*/
+        //4. CALCULAR LA SUMATORIA DE GRADOS DE PERTENENCIA DE CADA VARIABLE-ETIQUETA PARA DIVIDIR EN CUANTO SALE LA SUM(G.P.) t.q. SU VALOR DE VARIABLE CLASE SEA EL MISMO
+        //p.e. Si dataset IRIS tiene 3 posibles valores de clase = {iris-versicolor, iris-setosa, iris-virginica} --> Habrá que sacar 3 sumatorias de grados de pertenencia por cada variable-etiqueta.
+        baseD.sumatoria_GP_valorClase();
+        System.out.println(baseD.toString_sumGP_valorClase());
         
     }
     
@@ -797,7 +793,6 @@ public class ID3fuzzy extends Algorithm
         for (int i = 0; i < modelDataset.numClasses(); i++){
             String valor_atributo = modelDataset.getClassAttribute().value(i);
             valores_clase.addElement(new Pair(valor_atributo,0));
-            System.out.println(valores_clase.get(i));
         }
         
         for (int i = 0; i < modelDataset.IS.getNumInstances(); i++) { //Por cada instancia...
