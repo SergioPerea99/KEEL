@@ -116,9 +116,12 @@ public class ID3fuzzy extends Algorithm
                     System.out.println("HE LLEGADO HASTA AQUI 6");
                     
                     
-                    //3. Cálculo de la ENTROPÍA 
-                    calcularEntropia(baseD);
+                    //3. Cálculo de la ENTROPÍA.
+                    double entropia_general = calcularEntropia(baseD); //Las entropías de variable-etiquetas están almacenadas en baseD (Clase contenedora de datos útiles).
                     
+                    //4. Cálculo de la GANANCIA.
+                    calcularGanancia(entropia_general, baseD);
+                    System.out.println(baseD.toString_ganancia_var());
                     
     		}
     		
@@ -767,7 +770,7 @@ public class ID3fuzzy extends Algorithm
     
     }
 
-    private void calcularEntropia(BaseD baseD) {
+    private double calcularEntropia(BaseD baseD) {
         //1. Recorrer los valores que hay en las instancias de la variable CLASE. Así saber cuántos hay de cada uno.
         Vector valores_clase = contador_valores_clase();
         
@@ -789,10 +792,13 @@ public class ID3fuzzy extends Algorithm
         //5. Calcular las entropías de cada una de las etiquetas POR VARIABLE que existe.
         baseD.calcularEntropias_var_etq();
         
-        System.out.println(baseD.toString_sumGP_valorClase());
-        baseD.show_sum_GP_var_etq();
-        System.out.println(baseD.toString_entropias_var_etq());
+        return entropia_general; //Devuelve la ENTROPÍA GENERAL PARA TODAS LAS VARIABLES
 
+    }
+    
+    
+    private void calcularGanancia(double entropia_general, BaseD baseD) {
+        baseD.calcularGanancias_var(entropia_general);
     }
     
     
@@ -840,6 +846,8 @@ public class ID3fuzzy extends Algorithm
     private static double log2(double x){
         return (double) (Math.log(x) / Math.log(2));
     }
+
+    
     
     
 }//id3fuzzy

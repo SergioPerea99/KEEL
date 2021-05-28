@@ -42,6 +42,10 @@ public class BaseD {
     //Vector que indica las posiciones de las variables (no clase) el cual tiene un vector que contiene las ENTROPÍAS de las etiquetas respecto a esa variable.
     public Vector<Vector<Double>> entropias_var_etq;
     
+    
+    //Vector con las GANANCIAS por variable 
+    public Vector<Double> ganancias_var;
+    
     public BaseD(int MaxEtiquetas, Dataset dataset) {
         int i, j;
         
@@ -95,6 +99,8 @@ public class BaseD {
         for (int var = 0; var < n_etiquetas-1; var++)
             entropias_var_etq.add(var,new Vector());
         
+        
+        ganancias_var = new Vector(n_variables-1); //Tantas ganancias como variables (no tipo CLASE) haya.
         
 
         extremos = new TipoIntervalo[n_variables];
@@ -230,6 +236,20 @@ public class BaseD {
     }
     
     
+    void calcularGanancias_var(double entropia_general) {
+        double entropia_etiquetas, ganancia;
+        for (int var = 0; var < n_variables-1; var++) {
+            entropia_etiquetas = 0.0;
+            for (int etq = 0; etq < n_etiquetas; etq++) {
+                entropia_etiquetas -=  entropias_var_etq.get(var).get(etq);
+            }
+            ganancia = entropia_general - entropia_etiquetas;
+            ganancias_var.add(var, ganancia);
+        }
+    }
+    
+    
+    
     private static double log2(double x){
         return (double) (Math.log(x) / Math.log(2));
     }
@@ -308,6 +328,18 @@ public class BaseD {
         }
         return result;
     }
+    
+    
+    public String toString_ganancia_var(){
+        String result = "";
+        result += "------- GANANCIAS SEGUN VARIABLE --------\n";
+        for (int var = 0; var < ganancias_var.size(); var++) {
+            result += "V"+var+" = "+ganancias_var.get(var)+"\n";
+        }
+        return result;
+    }
+
+    
     
     
 }
