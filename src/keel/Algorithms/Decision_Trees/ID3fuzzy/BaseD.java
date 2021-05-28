@@ -221,8 +221,8 @@ public class BaseD {
                 
                 entropia = 0.0;
                 for (int pos_valor_clase = 0; pos_valor_clase < n_valores_clase; pos_valor_clase++)
-                    entropia -= (double)((double)sum_GP_valorClase_var_etq.get(pos_valor_clase).getValue()[var][etq] / (double)sum_grados_pertenencia_var_etq.get(var).get(etq)) * log2((double)sum_GP_valorClase_var_etq.get(pos_valor_clase).getValue()[var][etq] / (double)sum_grados_pertenencia_var_etq.get(var).get(etq)) ;
-                    //OJO: Se da el caso en el que se hace una indeterminación -> 0 * INFINITO --> Dará valor NaN y por lo tanto no se tendrán en cuenta para ver que ganancia tienen.
+                    if (sum_GP_valorClase_var_etq.get(pos_valor_clase).getValue()[var][etq] != 0.0)
+                        entropia -= (double)((double)sum_GP_valorClase_var_etq.get(pos_valor_clase).getValue()[var][etq] / (double)sum_grados_pertenencia_var_etq.get(var).get(etq)) * log2((double)sum_GP_valorClase_var_etq.get(pos_valor_clase).getValue()[var][etq] / (double)sum_grados_pertenencia_var_etq.get(var).get(etq)) ;
                     
                 entropias_var_etq.get(var).add(etq, entropia);
             }
