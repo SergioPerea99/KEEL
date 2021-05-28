@@ -778,13 +778,21 @@ public class ID3fuzzy extends Algorithm
         //3. Por cada VARIABLE, para sus correspondientes ETIQUETAS --> Calcular su Entropía.
         baseD.calcularSumatoriaGradosPertenencia(); //Calcular sumatoria de grados de pertenencia de cada variable-etiqueta 
         
-        System.out.println("HE LLEGADO HASTA AQUI 7");
+        
         
         //4. CALCULAR LA SUMATORIA DE GRADOS DE PERTENENCIA DE CADA VARIABLE-ETIQUETA PARA DIVIDIR EN CUANTO SALE LA SUM(G.P.) t.q. SU VALOR DE VARIABLE CLASE SEA EL MISMO
-        //p.e. Si dataset IRIS tiene 3 posibles valores de clase = {iris-versicolor, iris-setosa, iris-virginica} --> Habrá que sacar 3 sumatorias de grados de pertenencia por cada variable-etiqueta.
+            //p.e. Si dataset IRIS tiene 3 posibles valores de clase = {iris-versicolor, iris-setosa, iris-virginica} --> Habrá que sacar 3 sumatorias de grados de pertenencia por cada variable-etiqueta.
         baseD.sumatoria_GP_valorClase();
-        System.out.println(baseD.toString_sumGP_valorClase());
         
+        System.out.println("HE LLEGADO HASTA AQUI 7");
+        
+        //5. Calcular las entropías de cada una de las etiquetas POR VARIABLE que existe.
+        baseD.calcularEntropias_var_etq();
+        
+        System.out.println(baseD.toString_sumGP_valorClase());
+        baseD.show_sum_GP_var_etq();
+        System.out.println(baseD.toString_entropias_var_etq());
+
     }
     
     

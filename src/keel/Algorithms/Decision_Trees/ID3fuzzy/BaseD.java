@@ -39,6 +39,9 @@ public class BaseD {
     public Vector<Pair<String,double[][]>> sum_GP_valorClase_var_etq;
     
     
+    //Vector que indica las posiciones de las variables (no clase) el cual tiene un vector que contiene las ENTROPÍAS de las etiquetas respecto a esa variable.
+    public Vector<Vector<Double>> entropias_var_etq;
+    
     public BaseD(int MaxEtiquetas, Dataset dataset) {
         int i, j;
         
@@ -50,6 +53,16 @@ public class BaseD {
         
         BaseDatos = new Difuso[n_variables][MaxEtiquetas]; 
         valores_clase = new Vector();
+        
+        Attribute a1;
+        for (i = 0; i < n_variables; i++) {
+            BaseDatos[i] = new Difuso[MaxEtiquetas];
+            for (j = 0; j < MaxEtiquetas; j++)
+                BaseDatos[i][j] = new Difuso(); //Para cada etiqueta de cada variable se crea un Difuso por defecto (Es decir, sin nada). 
+        }
+        
+        System.out.println("HE LLEGADO HASTA AQUI 2");
+        
         
         gradosPertenencia = new Vector();
         for (i = 0; i < n_instancias; i++){ //Para cada instancia...
@@ -78,15 +91,10 @@ public class BaseD {
             }
         }
         
+        entropias_var_etq = new Vector();
+        for (int var = 0; var < n_etiquetas-1; var++)
+            entropias_var_etq.add(var,new Vector());
         
-        Attribute a1;
-        for (i = 0; i < n_variables; i++) {
-            BaseDatos[i] = new Difuso[MaxEtiquetas];
-            for (j = 0; j < MaxEtiquetas; j++)
-                BaseDatos[i][j] = new Difuso(); //Para cada etiqueta de cada variable se crea un Difuso por defecto (Es decir, sin nada). 
-        }
-        
-        System.out.println("HE LLEGADO HASTA AQUI 2");
         
 
         extremos = new TipoIntervalo[n_variables];
@@ -183,14 +191,6 @@ public class BaseD {
             sum_grados_pertenencia_var_etq.add(var, v_sumas); //Sumar el vector de sumatorias de grados de etiquetas en la posición de la variable correspondiente.
         }
         
-        
-        //Mostrar que se calcula bien...
-        /*for (int i = 0; i < sum_grados_pertenencia_var_etq.size(); i++) {
-            for (int etq = 0; etq < sum_grados_pertenencia_var_etq.get(i).size(); etq++) {
-                System.out.println("Variable "+i+" Etiqueta "+etq+" --> Sumatoria de grados = "+sum_grados_pertenencia_var_etq.get(i).get(etq));
-            }
-        }*/
-        
     }
     
     
@@ -212,6 +212,31 @@ public class BaseD {
             }
         }
     }
+    
+    
+    public void calcularEntropias_var_etq() {
+        double entropia;
+        for (int var = 0; var < n_variables-1; var++) { //Para cada variable... (que no sea la CLASE)
+            for (int etq = 0; etq < n_etiquetas; etq++) { //Para cada etiqueta...
+                
+                entropia = 0.0;
+                for (int pos_valor_clase = 0; pos_valor_clase < n_valores_clase; pos_valor_clase++)
+                    entropia -= (double)((double)sum_GP_valorClase_var_etq.get(pos_valor_clase).getValue()[var][etq] / (double)sum_grados_pertenencia_var_etq.get(var).get(etq)) * log2((double)sum_GP_valorClase_var_etq.get(pos_valor_clase).getValue()[var][etq] / (double)sum_grados_pertenencia_var_etq.get(var).get(etq)) ;
+                    //OJO: Se da el caso en el que se hace una indeterminación -> 0 * INFINITO --> Dará valor NaN y por lo tanto no se tendrán en cuenta para ver que ganancia tienen.
+                    
+                entropias_var_etq.get(var).add(etq, entropia);
+            }
+        }
+    }
+    
+    
+    private static double log2(double x){
+        return (double) (Math.log(x) / Math.log(2));
+    }
+    
+    
+    
+    /** ---------- MÉTODOS PARA MOSTRAR RESULTADOS DEL PROCESO DE FUZZIFICACIÓN AL ID3 ------------*/
     
     public String toStringBD(Dataset dataset){
         String result = "";
@@ -241,6 +266,18 @@ public class BaseD {
         }
         return result;
     }
+    
+    
+    public void show_sum_GP_var_etq(){
+        //Mostrar que se calcula bien...
+        for (int i = 0; i < sum_grados_pertenencia_var_etq.size(); i++) {
+            for (int etq = 0; etq < sum_grados_pertenencia_var_etq.get(i).size(); etq++) {
+                System.out.println("Variable "+i+" Etiqueta "+etq+" --> Sumatoria de grados = "+sum_grados_pertenencia_var_etq.get(i).get(etq));
+            }
+        }
+    }
+    
+    
 
     public String toString_sumGP_valorClase() {
         String result = "";
@@ -253,17 +290,24 @@ public class BaseD {
                 }
                 result += "\n";
             }
+            result += "\n";
         }
         
-        //Mostrar que se calcula bien...
-        for (int i = 0; i < sum_grados_pertenencia_var_etq.size(); i++) {
-            for (int etq = 0; etq < sum_grados_pertenencia_var_etq.get(i).size(); etq++) {
-                System.out.println("Variable "+i+" Etiqueta "+etq+" --> Sumatoria de grados = "+sum_grados_pertenencia_var_etq.get(i).get(etq));
-            }
-        }
         
         return result;
     }
 
+    public String toString_entropias_var_etq(){
+        String result = "";
+        result += "------- SUMATORIA DE ENTROPIAS POR CADA VARIABLE-ETIQUETA --------\n";
+        for (int var = 0; var < entropias_var_etq.size(); var++) {
+            for (int etq = 0; etq < entropias_var_etq.get(var).size(); etq++) {
+                result += "V"+var+"E"+etq+" = "+entropias_var_etq.get(var).get(etq)+" ";
+            }
+            result += "\n";
+        }
+        return result;
+    }
+    
     
 }
