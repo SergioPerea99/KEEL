@@ -63,6 +63,9 @@ public class ID3fuzzy extends Algorithm
 	
 	/** Number of Leafs in the tree */
 	int NumberOfLeafs;  
+        
+        /** Numero de etiquetas por variable*/
+        int NumberOfLabs;
 	
 	
 	/** Constructor.
@@ -91,6 +94,7 @@ public class ID3fuzzy extends Algorithm
 
                 NumberOfNodes = 0;
                 NumberOfLeafs = 0;
+                NumberOfLabs = 5;
                 
     		/*check if there are continous attributes*/
     		if(Attributes.hasRealAttributes() || Attributes.hasIntegerAttributes())
@@ -101,7 +105,7 @@ public class ID3fuzzy extends Algorithm
                     
 
                     //1. Crear las etiquetas de las variables, de forma x-distribuida con la función de pertenencia triangular.
-                    BaseD baseD = new BaseD(5, modelDataset); //TODO: HACER QUE ESE 3 (3 ETIQUETAS) SE INDIQUE DESDE EL FICHERO DE CONFIGURACIÓN
+                    BaseD baseD = new BaseD(NumberOfLabs, modelDataset); //TODO: HACER QUE ESE 3 (3 ETIQUETAS) SE INDIQUE DESDE EL FICHERO DE CONFIGURACIÓN
                     baseD.Semantica(modelDataset); //Crea las N etiquetas por los M atributos de forma x-distribuida.
                     //System.out.println(baseD.toStringBD(modelDataset));
                     
@@ -113,7 +117,7 @@ public class ID3fuzzy extends Algorithm
                     
                     
                     //3. Cálculo de la ENTROPÍA 
-                    calcularEntropia();
+                    calcularEntropia(baseD);
                     
                     
     		}
@@ -746,16 +750,24 @@ public class ID3fuzzy extends Algorithm
         for (int i = 0; i < modelDataset.IS.getNumInstances(); i++) {
             String tupla = modelDataset.IS.getInstances()[i].toString();
             String[] partes_tupla = tupla.split(",");
+            
+            //Atributos que no sean clase
             for (int j = 0; j < partes_tupla.length-1; j++){ //Todas las partes menos la de la clase
                 //Tiene que haber tantas como variables (no clase)...
                 valor_variable = Double.parseDouble(partes_tupla[j]);
                 baseD.calcularGradosPertenencia(i, j, valor_variable);//Pasar el índice de la variable y su valor.
             }
+            
+            //VALOR del atributo clase
+            String valor_instancia_clase = partes_tupla[partes_tupla.length-1]; //TODO: Esto en caso de que siempre sea discreta
+            baseD.addValorClase(i,valor_instancia_clase);
+            
+            
         }
     
     }
 
-    private void calcularEntropia() {
+    private void calcularEntropia(BaseD baseD) {
         //1. Recorrer los valores que hay en las instancias de la variable CLASE. Así saber cuántos hay de cada uno.
         Vector valores_clase = contador_valores_clase();
         
@@ -765,10 +777,19 @@ public class ID3fuzzy extends Algorithm
         System.out.println("HE LLEGADO HASTA AQUI 7");
         
         //3. Por cada VARIABLE, para sus correspondientes ETIQUETAS --> Calcular su Entropía.
+        System.out.println(baseD.toStringGradoPert());
+        baseD.calcularSumatoriaGradosPertenencia(); //Calcular sumatoria de grados de pertenencia de cada variable-etiqueta 
         
+        
+        
+        /*int index_var_clase = modelDataset.numAttributes()-1;
+        for (int var = 0; var < modelDataset.numAttributes()-1; var++){
+            for (int etq = 0; etq < NumberOfLabs; etq++){
+                
+            }
+        }*/
         
     }
-    
     
     
     private Vector contador_valores_clase(){
@@ -792,8 +813,6 @@ public class ID3fuzzy extends Algorithm
             
         }
         
-        
-        
         /*System.out.println("");
         System.out.println("Archivo "+modelDataset.getName()+" con "+modelDataset.numClasses()+" : ");
         for (int j = 0; j < valores_clase.size(); j++){
@@ -811,14 +830,13 @@ public class ID3fuzzy extends Algorithm
             Pair<String,Integer> par = (Pair<String, Integer>)valores_clase.get(i);
             entropia_general -= ((double)par.getValue()/(double)modelDataset.IS.getNumInstances()) * log2((double)par.getValue()/(double)modelDataset.IS.getNumInstances());
         }
-        System.out.println("ENTROPIA GENERAL = "+entropia_general);
+        //System.out.println("ENTROPIA GENERAL = "+entropia_general);
         return entropia_general;
     }
 
-   	
-    
     private static double log2(double x){
         return (double) (Math.log(x) / Math.log(2));
     }
+    
     
 }//id3fuzzy

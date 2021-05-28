@@ -19,15 +19,28 @@ public class BaseD {
     public TipoIntervalo[] extremos;
     public TipoIntervalo[][] intervalos;
     
+    //Vector que: las posiciones indican las INSTANCIAS, su contenido es una matriz que indica (posiciones -> [variable][etiqueta] , contenido -> grado de pertenencia)
     public Vector<double[][]> gradosPertenencia;
-
-
+    
+    //Vector que: las posiciones son las INSTANCIAS y su contenido es el VALOR de la variable CLASE para esa instancia.
+    public Vector<String> valores_clase;
+    
+    //Vector que recoge las sumas de todos los grados de pertenencia de cada etiqueta respecto a su variable. (siendo cada posición del vector una variable)
+    public Vector<Vector<Double>> sum_grados_pertenencia_var_etq; 
+    
+    
     public BaseD(int MaxEtiquetas, Dataset dataset) {
         int i, j;
         
         //Se inicializan...
         n_variables = dataset.numAttributes(); //El número de variables (sin contar variable CLASE --> CAMBIAR)
+        n_etiquetas = MaxEtiquetas;
         BaseDatos = new Difuso[n_variables][MaxEtiquetas]; //Los "triangulos" que marcan la función de pertenencia de cada etiqueta de una variable.
+        valores_clase = new Vector();
+        
+        sum_grados_pertenencia_var_etq = new Vector();
+        for (i = 0; i < n_variables-1; i++) //Todas las variables menos la variable CLASE
+            sum_grados_pertenencia_var_etq.addElement(new Vector(MaxEtiquetas));
         
         gradosPertenencia = new Vector();
         for (i = 0; i < dataset.IS.getNumInstances(); i++){
@@ -49,7 +62,7 @@ public class BaseD {
         }
         
         System.out.println("HE LLEGADO HASTA AQUI 2");
-        n_etiquetas = MaxEtiquetas;
+        
 
         extremos = new TipoIntervalo[n_variables];
         for (i = 0; i < n_variables; i++) {
@@ -120,7 +133,37 @@ public class BaseD {
             if (gradosPertenencia.get(instancia)[var][i] > 0.0 && i < gradosPertenencia.get(instancia)[var].length-1){
                 gradosPertenencia.get(instancia)[var][i+1] = 1 - gradosPertenencia.get(instancia)[var][i]; //Sabiendo que son x-distribuidas, la continua a ella es 1-grado_pertenencia
                 salir = true; //Los demás se quedan con su valor por defecto, el es 0.0 que es el que les corresponderá.
-                //System.out.println("VARIABLE "+var+" --> "+valor_dato+" ::::: {etiqueta"+i+" = "+gradosPertenencia[var][i]+"etiqueta"+(i+1)+" = "+gradosPertenencia[var][i+1]+"}");
+                //System.out.println("VARIABLE "+var+" --> "+valor_dato+" ::::: {etiqueta"+i+" = "+gradosPertenencia.get(instancia)[var][i]+"etiqueta"+(i+1)+" = "+gradosPertenencia.get(instancia)[var][i+1]+"}");
+            }
+        }
+    }
+    
+    
+    public void addValorClase(int pos_instancia, String valor){
+        valores_clase.add(pos_instancia, valor);
+    }
+    
+    
+    public void calcularSumatoriaGradosPertenencia(){
+        double sum;
+        Vector<Double> v_sumas;
+        for (int var = 0; var < n_variables-1; var++) { //Por cada variable... (que no sea variable CLASE)
+            v_sumas = new Vector(n_etiquetas);
+            for (int etq = 0; etq < n_etiquetas; etq++){ //Por cada etiqueta...
+                sum = 0.0;
+                for (int ins = 0; ins < gradosPertenencia.size(); ins++){ //Por cada instancia...
+                    sum += gradosPertenencia.get(ins)[var][etq];
+                }
+                v_sumas.add(etq, sum); //Añadir la sumatoria de grados de pertenencia de la etiqueta correspondiente.
+            }
+            sum_grados_pertenencia_var_etq.add(var, v_sumas); //Sumar el vector de sumatorias de grados de etiquetas en la posición de la variable correspondiente.
+        }
+        
+        
+        //Mostrar que se calcula bien...
+        for (int i = 0; i < sum_grados_pertenencia_var_etq.size(); i++) {
+            for (int etq = 0; etq < sum_grados_pertenencia_var_etq.get(i).size(); etq++) {
+                System.out.println("Variable "+i+" Etiqueta "+etq+" --> Sumatoria de grados = "+sum_grados_pertenencia_var_etq.get(i).get(etq));
             }
         }
         
