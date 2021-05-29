@@ -54,7 +54,10 @@ class Node
 	private int attribute;			
 	
 	/** If this is not a leaf node, the attribute-value that is used to divide the set of data points. */
-	private int value;				
+	private int value;
+        
+        /** If this is not a leaf node, the attribute-value that is used to divide the set of data points (for continuos and integer datasets) */
+        private double value_fuzzy;
 	
 	/** If this is not a leaf node, references to the children nodes. */
 	private Node []children;		
@@ -129,6 +132,12 @@ class Node
 	{
 		value = valIndex;
 	}
+        
+        //FUZZY
+        public void setDecompositionValueFuzzy( double valIndex )
+	{
+		value_fuzzy = valIndex;
+	}
 	
 	/** Returns the index of the value used to decompose the node.
 	 * 
@@ -136,6 +145,12 @@ class Node
 	public int getDecompositionValue()
 	{
 		return value;
+	}
+        
+        //FUZZY
+        public double getDecompositionValueFuzzy()
+	{
+		return value_fuzzy;
 	}
 
 	/** Function to set the children of the node.

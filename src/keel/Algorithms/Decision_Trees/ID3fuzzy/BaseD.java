@@ -46,14 +46,14 @@ public class BaseD {
     //Vector con las GANANCIAS por variable 
     public Vector<Double> ganancias_var;
     
-    public BaseD(int MaxEtiquetas, Dataset dataset) {
+    public BaseD(int MaxEtiquetas, Dataset dataset, Vector<Itemset> itemsets) {
         int i, j;
         
         //Se inicializan...
         n_variables = dataset.numAttributes(); //El número de variables (sin contar variable CLASE --> CAMBIAR)
         n_etiquetas = MaxEtiquetas; //Nº etiquetas
         n_valores_clase = dataset.numClasses(); //Nº posibles valores de la CLASE
-        n_instancias = dataset.IS.getNumInstances(); //Nº de tuplas (instancias) de datos.
+        n_instancias = itemsets.size(); //Nº de tuplas (instancias) de datos.
         
         BaseDatos = new Difuso[n_variables][MaxEtiquetas]; 
         valores_clase = new Vector();
@@ -65,7 +65,7 @@ public class BaseD {
                 BaseDatos[i][j] = new Difuso(); //Para cada etiqueta de cada variable se crea un Difuso por defecto (Es decir, sin nada). 
         }
         
-        System.out.println("HE LLEGADO HASTA AQUI 2");
+        //System.out.println("HE LLEGADO HASTA AQUI 2");
         
         
         gradosPertenencia = new Vector();
@@ -110,7 +110,7 @@ public class BaseD {
                 extremos[i] = new TipoIntervalo((double)a1.getMinRange(), (double)a1.getMaxRange());
         }
         
-        System.out.println("HE LLEGADO HASTA AQUI 3");
+        //System.out.println("HE LLEGADO HASTA AQUI 3");
     }
 
 
@@ -159,7 +159,7 @@ public class BaseD {
                 }
             }
         }
-        System.out.println("HE LLEGADO HASTA AQUI 5");
+        //System.out.println("HE LLEGADO HASTA AQUI 5");
     }
     
     
@@ -174,6 +174,7 @@ public class BaseD {
                 salir = true; //Los demás se quedan con su valor por defecto, el es 0.0 que es el que les corresponderá.
             }
         }
+        
     }
     
     
@@ -336,6 +337,17 @@ public class BaseD {
         for (int var = 0; var < ganancias_var.size(); var++) {
             result += "V"+var+" = "+ganancias_var.get(var)+"\n";
         }
+        return result;
+    }
+    
+    
+    public String toString_valoresClase(){
+        String result = "";
+        result += "------- VALORES DE LA CLASE POR INSTANCIAS --------\n";
+        for (int ins = 0; ins < valores_clase.size(); ins++) {
+            result += "I"+ins+" = "+valores_clase.get(ins)+" ";
+        }
+        result += "\n";
         return result;
     }
 
