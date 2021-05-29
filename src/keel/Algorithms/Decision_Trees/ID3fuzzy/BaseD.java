@@ -65,8 +65,6 @@ public class BaseD {
                 BaseDatos[i][j] = new Difuso(); //Para cada etiqueta de cada variable se crea un Difuso por defecto (Es decir, sin nada). 
         }
         
-        //System.out.println("HE LLEGADO HASTA AQUI 2");
-        
         
         gradosPertenencia = new Vector();
         for (i = 0; i < n_instancias; i++){ //Para cada instancia...
@@ -96,7 +94,7 @@ public class BaseD {
         }
         
         entropias_var_etq = new Vector();
-        for (int var = 0; var < n_etiquetas-1; var++)
+        for (int var = 0; var < n_variables-1; var++)
             entropias_var_etq.add(var,new Vector());
         
         
@@ -110,7 +108,7 @@ public class BaseD {
                 extremos[i] = new TipoIntervalo((double)a1.getMinRange(), (double)a1.getMaxRange());
         }
         
-        //System.out.println("HE LLEGADO HASTA AQUI 3");
+        System.out.println("HE LLEGADO HASTA AQUI 3");
     }
 
 
@@ -159,7 +157,7 @@ public class BaseD {
                 }
             }
         }
-        //System.out.println("HE LLEGADO HASTA AQUI 5");
+        System.out.println("HE LLEGADO HASTA AQUI 5");
     }
     
     
@@ -218,6 +216,8 @@ public class BaseD {
                 }
             }
         }
+        
+        System.out.println(toString_sumGP_valorClase());
     }
     
     
@@ -234,6 +234,7 @@ public class BaseD {
                 entropias_var_etq.get(var).add(etq, entropia);
             }
         }
+        System.out.println(toString_entropias_var_etq());
     }
     
     

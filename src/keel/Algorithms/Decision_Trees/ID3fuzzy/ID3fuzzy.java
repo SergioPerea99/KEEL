@@ -884,15 +884,25 @@ public class ID3fuzzy extends Algorithm
         //1. Recorrer los valores que hay en las instancias de la variable CLASE. Así saber cuántos hay de cada uno.
         contador_valores_clase(itemsets, valores_clase);
         
+        System.out.println("HE LLEGADO HASTA AQUI 6.1");
+        
         //2. Cálculo de la ENTROPÍA GENERAL.
         double entropia_general = calcularEntropia_general(valores_clase, itemsets);
+        
+        
+        System.out.println("HE LLEGADO HASTA AQUI 6.2");
         
         //3. Por cada VARIABLE, para sus correspondientes ETIQUETAS --> Calcular su Entropía.
         baseD.calcularSumatoriaGradosPertenencia(); //Calcular sumatoria de grados de pertenencia de cada variable-etiqueta 
         
+        
+        System.out.println("HE LLEGADO HASTA AQUI 6.3");
+        
         //4. CALCULAR LA SUMATORIA DE GRADOS DE PERTENENCIA DE CADA VARIABLE-ETIQUETA PARA DIVIDIR EN CUANTO SALE LA SUM(G.P.) t.q. SU VALOR DE VARIABLE CLASE SEA EL MISMO
             //p.e. Si dataset IRIS tiene 3 posibles valores de clase = {iris-versicolor, iris-setosa, iris-virginica} --> Habrá que sacar 3 sumatorias de grados de pertenencia por cada variable-etiqueta.
         baseD.sumatoria_GP_valorClase();
+        
+        System.out.println("HE LLEGADO HASTA AQUI 6.4");
         
         //5. Calcular las entropías de cada una de las etiquetas POR VARIABLE que existe.
         baseD.calcularEntropias_var_etq();
@@ -1010,14 +1020,19 @@ public class ID3fuzzy extends Algorithm
             //2. Recorrer las instancias de datos del DATASET e ir rellenando el grado de pertenencia de dicho valor para cada una de las etiquetas respecto a su variable.
             gradosDePertenencia(baseD, node.getData());
             
+            System.out.println("HE LLEGADO HASTA AQUI 6");
+            
             //3. Cálculo de la ENTROPÍA.
             Vector cont_valores_clase = new Vector();
             double entropia_general = calcularEntropia(baseD, node.getData(), cont_valores_clase); //Las entropías de variable-etiquetas están almacenadas en baseD (Clase contenedora de datos útiles).
             
+            System.out.println("HE LLEGADO HASTA AQUI 7");
             
             //4. Cálculo de la GANANCIA.
             Vector<Pair<Integer,Double>> v_ganancias_ordenado = calcularGanancia(entropia_general, baseD);
             
+            
+            System.out.println("HE LLEGADO HASTA AQUI 8");
             
             node.setEntropy( entropia_general );
 		

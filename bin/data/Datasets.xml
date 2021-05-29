@@ -412,5 +412,89 @@
     <field>Real</field>
     <userDataset />
   </dataset>
+  <dataset>
+    <nameAbr>bupa-10</nameAbr>
+    <nameComplete>bupa-10</nameComplete>
+    <problemType>Classification</problemType>
+    <partitions>
+      <partition>10cfv</partition>
+    </partitions>
+    <continuous>Yes</continuous>
+    <integer>Yes</integer>
+    <nominal>Yes</nominal>
+    <imprecise>No</imprecise>
+    <missing>No</missing>
+    <percMissingValues>0.0</percMissingValues>
+    <multioutput>No</multioutput>
+    <multiclass>No</multiclass>
+    <nAttributes>7</nAttributes>
+    <nInstances>345</nInstances>
+    <nClasses>2</nClasses>
+    <field>Real</field>
+    <userDataset />
+  </dataset>
+  <dataset>
+    <nameAbr>glass-10</nameAbr>
+    <nameComplete>glass-10</nameComplete>
+    <problemType>Classification</problemType>
+    <partitions>
+      <partition>10cfv</partition>
+    </partitions>
+    <continuous>Yes</continuous>
+    <integer>No</integer>
+    <nominal>Yes</nominal>
+    <imprecise>No</imprecise>
+    <missing>No</missing>
+    <percMissingValues>0.0</percMissingValues>
+    <multioutput>No</multioutput>
+    <multiclass>Yes</multiclass>
+    <nAttributes>10</nAttributes>
+    <nInstances>214</nInstances>
+    <nClasses>7</nClasses>
+    <field>Real</field>
+    <userDataset />
+  </dataset>
+  <dataset>
+    <nameAbr>tic-tac-toe-10</nameAbr>
+    <nameComplete>tic-tac-toe-10</nameComplete>
+    <problemType>Classification</problemType>
+    <partitions>
+      <partition>10cfv</partition>
+    </partitions>
+    <continuous>No</continuous>
+    <integer>No</integer>
+    <nominal>Yes</nominal>
+    <imprecise>No</imprecise>
+    <missing>No</missing>
+    <percMissingValues>0.0</percMissingValues>
+    <multioutput>No</multioutput>
+    <multiclass>No</multiclass>
+    <nAttributes>10</nAttributes>
+    <nInstances>958</nInstances>
+    <nClasses>2</nClasses>
+    <field>Real</field>
+    <userDataset />
+  </dataset>
+  <dataset>
+    <nameAbr>zoo-10</nameAbr>
+    <nameComplete>zoo-10</nameComplete>
+    <problemType>Classification</problemType>
+    <partitions>
+      <partition>10cfv</partition>
+    </partitions>
+    <continuous>No</continuous>
+    <integer>No</integer>
+    <nominal>Yes</nominal>
+    <imprecise>No</imprecise>
+    <missing>No</missing>
+    <percMissingValues>0.0</percMissingValues>
+    <multioutput>No</multioutput>
+    <multiclass>Yes</multiclass>
+    <nAttributes>17</nAttributes>
+    <nInstances>101</nInstances>
+    <nClasses>7</nClasses>
+    <field>Real</field>
+    <userDataset />
+  </dataset>
 </dataset_list>
 
