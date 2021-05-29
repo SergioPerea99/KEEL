@@ -17,7 +17,7 @@ public class BaseD {
     public int n_variables;
     public int n_etiquetas;
     public int n_valores_clase;
-    public int n_instancias;
+    public int n_instanicas_inicial;
 
     public TipoIntervalo[] extremos;
     public TipoIntervalo[][] intervalos;
@@ -46,18 +46,16 @@ public class BaseD {
     //Vector con las GANANCIAS por variable 
     public Vector<Double> ganancias_var;
     
-    public BaseD(int MaxEtiquetas, Dataset dataset, Vector<Itemset> itemsets) {
+    public BaseD(int MaxEtiquetas, Dataset dataset) {
         int i, j;
         
-        //Se inicializan...
+        //Se inicializa todo aquello que no será cambiante...
         n_variables = dataset.numAttributes(); //El número de variables (sin contar variable CLASE --> CAMBIAR)
         n_etiquetas = MaxEtiquetas; //Nº etiquetas
         n_valores_clase = dataset.numClasses(); //Nº posibles valores de la CLASE
-        n_instancias = itemsets.size(); //Nº de tuplas (instancias) de datos.
+        n_instanicas_inicial = dataset.numItemsets(); //NºItemsets (instancias) completas que existen en el dataset.
         
         BaseDatos = new Difuso[n_variables][MaxEtiquetas]; 
-        valores_clase = new Vector();
-        
         Attribute a1;
         for (i = 0; i < n_variables; i++) {
             BaseDatos[i] = new Difuso[MaxEtiquetas];
@@ -65,42 +63,6 @@ public class BaseD {
                 BaseDatos[i][j] = new Difuso(); //Para cada etiqueta de cada variable se crea un Difuso por defecto (Es decir, sin nada). 
         }
         
-        
-        gradosPertenencia = new Vector();
-        for (i = 0; i < n_instancias; i++){ //Para cada instancia...
-            gradosPertenencia.addElement(new double[n_variables][n_etiquetas]);
-            for (int var = 0; var < n_variables; var++){ //Para cada variable...
-              gradosPertenencia.get(i)[var] = new double[n_etiquetas]; 
-              for (int etq = 0; etq < n_etiquetas; etq++) //Para cada etiqueta...
-                  gradosPertenencia.get(i)[var][etq] = 0.0; 
-              
-            }
-        }
-        
-        
-        sum_grados_pertenencia_var_etq = new Vector();
-        for (i = 0; i < n_variables-1; i++) //Todas las variables menos la variable CLASE
-            sum_grados_pertenencia_var_etq.addElement(new Vector(MaxEtiquetas));
-           
-        
-        sum_GP_valorClase_var_etq = new Vector();
-        for (i = 0; i < n_valores_clase; i++){ //Para cada posible valor que puede tomar la CLASE...
-            sum_GP_valorClase_var_etq.add(i, new Pair(dataset.getClassAttribute().value(i),new double[n_variables-1][n_etiquetas]));
-            for (int var = 0; var < n_variables-1; var++) { //Para cada variable... (que no sea la CLASE)
-                sum_GP_valorClase_var_etq.get(i).getValue()[var] = new double[n_etiquetas];
-                for (int etq = 0; etq < n_etiquetas; etq++) //Para cada etiqueta...
-                    sum_GP_valorClase_var_etq.get(i).getValue()[var][etq] = 0.0;
-            }
-        }
-        
-        entropias_var_etq = new Vector();
-        for (int var = 0; var < n_variables-1; var++)
-            entropias_var_etq.add(var,new Vector());
-        
-        
-        ganancias_var = new Vector(n_variables-1); //Tantas ganancias como variables (no tipo CLASE) haya.
-        
-
         extremos = new TipoIntervalo[n_variables];
         for (i = 0; i < n_variables; i++) {
             a1 = (Attribute)dataset.attributes.get(i);
@@ -108,7 +70,7 @@ public class BaseD {
                 extremos[i] = new TipoIntervalo((double)a1.getMinRange(), (double)a1.getMaxRange());
         }
         
-        System.out.println("HE LLEGADO HASTA AQUI 3");
+        
     }
 
 
@@ -157,14 +119,15 @@ public class BaseD {
                 }
             }
         }
-        System.out.println("HE LLEGADO HASTA AQUI 5");
+        
     }
     
     
     
     public void calcularGradosPertenencia(int instancia, int var, double valor_dato){
-        boolean salir = false;
         
+        /*Mete el valor de grado de pertenencia a sus etiquetas de la variable parametrizada respecto a la instancia*/
+        boolean salir = false;
         for(int i = 0; i < gradosPertenencia.get(instancia)[var].length && !salir; i++){ //Recorre las etiquetas de la variable "var"
             gradosPertenencia.get(instancia)[var][i] = BaseDatos[var][i].Fuzzifica(valor_dato);
             if (gradosPertenencia.get(instancia)[var][i] > 0.0 && i < gradosPertenencia.get(instancia)[var].length-1){
@@ -199,7 +162,7 @@ public class BaseD {
     }
     
     
-    public void sumatoria_GP_valorClase() {
+    public void sumatoria_GP_valorClase(int n_instancias) {
         //4. CALCULAR LA SUMATORIA DE GRADOS DE PERTENENCIA DE CADA VARIABLE-ETIQUETA PARA DIVIDIR EN CUANTO SALE LA SUM(G.P.) t.q. SU VALOR DE VARIABLE CLASE SEA EL MISMO
         //p.e. Si dataset IRIS tiene 3 posibles valores de clase = {iris-versicolor, iris-setosa, iris-virginica} --> Habrá que sacar 3 sumatorias de grados de pertenencia por cada variable-etiqueta.
         
@@ -217,7 +180,7 @@ public class BaseD {
             }
         }
         
-        System.out.println(toString_sumGP_valorClase());
+        
     }
     
     
@@ -234,7 +197,7 @@ public class BaseD {
                 entropias_var_etq.get(var).add(etq, entropia);
             }
         }
-        System.out.println(toString_entropias_var_etq());
+        
     }
     
     
@@ -299,7 +262,6 @@ public class BaseD {
         }
     }
     
-    
 
     public String toString_sumGP_valorClase() {
         String result = "";
@@ -350,6 +312,48 @@ public class BaseD {
         }
         result += "\n";
         return result;
+    }
+
+    void reinicio(Dataset dataset, int num_instancias) {
+        int i;
+        
+        
+        gradosPertenencia = new Vector();
+        for (i = 0; i < num_instancias; i++) {
+            gradosPertenencia.addElement(new double[n_variables][n_etiquetas]);
+            for (int var = 0; var < n_variables; var++) {
+                gradosPertenencia.get(i)[var] = new double[n_etiquetas];
+                for (int etq = 0; etq < n_etiquetas; etq++)
+                    gradosPertenencia.get(i)[var][etq] = 0.0;
+            }
+        }
+        
+        
+        valores_clase = new Vector();
+        
+        sum_grados_pertenencia_var_etq = new Vector();
+        for (i = 0; i < n_variables-1; i++) //Todas las variables menos la variable CLASE
+            sum_grados_pertenencia_var_etq.addElement(new Vector(n_etiquetas));
+           
+        
+        sum_GP_valorClase_var_etq = new Vector();
+        for (i = 0; i < n_valores_clase; i++){ //Para cada posible valor que puede tomar la CLASE...
+            sum_GP_valorClase_var_etq.add(i, new Pair(dataset.getClassAttribute().value(i),new double[n_variables-1][n_etiquetas]));
+            for (int var = 0; var < n_variables-1; var++) { //Para cada variable... (que no sea la CLASE)
+                sum_GP_valorClase_var_etq.get(i).getValue()[var] = new double[n_etiquetas];
+                for (int etq = 0; etq < n_etiquetas; etq++) //Para cada etiqueta...
+                    sum_GP_valorClase_var_etq.get(i).getValue()[var][etq] = 0.0;
+            }
+        }
+        
+        entropias_var_etq = new Vector();
+        for (int var = 0; var < n_variables-1; var++)
+            entropias_var_etq.add(var,new Vector());
+        
+        
+        ganancias_var = new Vector(n_variables-1); //Tantas ganancias como variables (no tipo CLASE) haya.
+        
+        
     }
 
     

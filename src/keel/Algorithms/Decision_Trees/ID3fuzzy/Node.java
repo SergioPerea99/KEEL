@@ -57,7 +57,7 @@ class Node
 	private int value;
         
         /** If this is not a leaf node, the attribute-value that is used to divide the set of data points (for continuos and integer datasets) */
-        private double value_fuzzy;
+        private Vector<String> value_fuzzy;
 	
 	/** If this is not a leaf node, references to the children nodes. */
 	private Node []children;		
@@ -134,9 +134,9 @@ class Node
 	}
         
         //FUZZY
-        public void setDecompositionValueFuzzy( double valIndex )
+        public void setDecompositionValueFuzzy( Vector<String> v_value )
 	{
-		value_fuzzy = valIndex;
+		value_fuzzy = new Vector(v_value);
 	}
 	
 	/** Returns the index of the value used to decompose the node.
@@ -148,9 +148,9 @@ class Node
 	}
         
         //FUZZY
-        public double getDecompositionValueFuzzy()
+        public String getDecompositionValueFuzzy(int index)
 	{
-		return value_fuzzy;
+		return value_fuzzy.get(index);
 	}
 
 	/** Function to set the children of the node.
@@ -218,4 +218,9 @@ class Node
 	{
 		return parent;
 	}
+
+        public int numDescompositionValueFuzzy() 
+        {
+                return value_fuzzy.size();
+        }
 };
