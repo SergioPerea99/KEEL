@@ -73,7 +73,7 @@ public class ID3fuzzy extends Algorithm
         /**Porcentaje mínimo del TOTAL de ejemplos a considerar para finalizar la expansión de nodos. */
 	double PORCENTAJE_MIN_EJEMPLOS;
         
-        /**Base Difusa*/
+        /**Base Difusa que sirve de almacenamiento de datos calculados durante la ejecución del algoritmo FUZZY ID3.*/
         BaseD baseD;
         
         
@@ -141,7 +141,7 @@ public class ID3fuzzy extends Algorithm
 	 * 
 	 * @throws Exception	If the format of the file is not correct.
 	 */ 
-    protected void setOptions( StreamTokenizer options ) throws Exception
+        protected void setOptions( StreamTokenizer options ) throws Exception
 	{
   		options.nextToken();
 		
@@ -322,63 +322,6 @@ public class ID3fuzzy extends Algorithm
         return cadena;
 	}
         
-        //FUZZY
-        public String writeTreeFuzzy( Node node, String tab ) 
-	{
-		int outputattr = modelDataset.getClassIndex();
-		String cadena = "";
-		Attribute classAtt = modelDataset.getClassAttribute();
-		String attName = classAtt.name();
-
-        try
-        {
-        	// Print a leaf node. 
-        	if ( node.getChildren() == null ) 
-        	{
-        		String value = getCommonClass( node.getData(), outputattr );
-        		
-       			cadena = tab + attName + " = \"" + value + "\"\n";
-       			
-       			/* new */
-       			NumberOfLeafs++;
-       			
-       			return cadena;
-       			
-        	}
-		
-        	// Print a rule. 
-        	cadena += tab + "if( " + modelDataset.getAttribute( node.getDecompositionAttribute() ).name() + 
-				" ==  ["+ node.getDecompositionValueFuzzy(0).getKey() +", "+node.getDecompositionValueFuzzy(0).getValue() +"]  ) then \n";
-        	cadena += tab + "{\n";
-        	if (node.getChildren()[0] != null){
-                    cadena += writeTreeFuzzy( node.getChildren()[0], tab + "\t" );
-                    cadena += tab + "}\n";
-                    NumberOfNodes++;
-                }
-                for (int i = 1; i < node.numDescompositionValueFuzzy(); i++){
-                    if (node.getChildren()[i] != null){
-                        cadena += tab +  "else if ("+ modelDataset.getAttribute( node.getDecompositionAttribute() ).name() +
-                                        " ==  ["+ node.getDecompositionValueFuzzy(i).getKey() +", "+node.getDecompositionValueFuzzy(i).getValue() +"]  ) then \n";
-                        cadena += tab + "{\n";
-                    
-                        cadena +=writeTreeFuzzy( node.getChildren()[i], tab + "\t" );
-                        cadena += tab + "}\n";
-                    }
-                    /* new */
-     		    NumberOfNodes++;
-                }	    
-		
-                NumberOfNodes++;
-
-        	return cadena;
-        }
-        catch( Exception e ){
-            System.out.println( "Error writing tree" );
-        }		
-
-        return cadena;
-	}
-	
 
 	/** Function to evaluate the class which the itemset must have according to the classification of the tree.
 	 * 
@@ -438,86 +381,6 @@ public class ID3fuzzy extends Algorithm
 			return( evaluateItemset( itemset, node.getChildren()[1] ) );
 	}
         
-        //FUZZY
-        public int evaluateItemsetFuzzy(Itemset itemset, Node node) {
-            int outputattr = modelDataset.getClassIndex();
-            boolean correct = false;
-            String aux = null;
-            Attribute classAtt = modelDataset.getClassAttribute();
-            
-            try 
-		{
-      	        	                
-			// if the node is a final leaf
-			if ( node.getChildren() == null ) 
-			{
-				int []values = getAllValues( node.getData(), outputattr );
-			
-				if ( values.length == 1 ) 
-				{				
-					if( values[0] == itemset.getClassValue() )
-					{
-						aux = classAtt.value( values[0] ); //
-						aux = aux + " " + aux + "\n";	
-				 
-						return values[0];
-					}
-					else
-					{
-						aux = classAtt.value( (int)itemset.getClassValue() );
-						aux = aux + " " + classAtt.value(values[0]) + "\n";	 			 
-				 
-						return values[0];
-					}
-				}
-
-				aux = classAtt.value( (int)itemset.getClassValue() );
-				aux = aux + " null\n";
-			
-				return (int)itemset.getClassValue();
-			}
-		}
-            catch ( Exception e)
-            {
-                    return Integer.parseInt( aux.toString() );
-            }
-            
-            
-            /*try {
-
-                // Si el nodo es un nodo HOJA -> Hay que sacar que valor de clase te dice que debe de ser.
-                if (node.getChildren() == null) {
-                    
-                    int value = indexValueClassPredominant(node.getData(), outputattr);
-
-                    if (value == itemset.getClassValue()) //Comprobamos si ese valor se corresponde con el valor de la clase del itemset pasado por parametro.
-                    {
-                        aux = classAtt.value(value);
-                        aux = aux + " " + aux + "\n";	//Esto sirve para mostrar luego la correspondencia de que tienen el mismo valor de clase.
-                    } else if (value != -1) {
-                        aux = classAtt.value((int) itemset.getClassValue());
-                        aux = aux + " " + classAtt.value(value) + "\n"; //Esto sirve para mostrar luego que NO tienen el mismo valor de clase.
-                        return value;
-                    } else {  //En caso de que no se haya retornado ningun indice de valor de clase predominante entre el conjunto de datos de itemsets de este nodo hoja. 
-                        aux = classAtt.value((int) itemset.getClassValue()); //Recoge el valor de la clase
-                        aux = aux + " null\n";
-                    }
-                    return (int)itemset.getClassValue();
-                }
-            } catch (Exception e) {
-                return Integer.parseInt(aux.toString());
-            }*/
-
-            // En caso de no ser nodo hoja, llega hast aquí -> Encontrar aquel nodo por el que debe seguir profundizando según el Valor por el que descompone...
-            for (int i = 0; i < node.numChildren() - 1; i++) {
-                //Si el valor en el itemset para ese atributo concreto está entre el intervalo de la etiqueta (del hijo correspondiente)
-                if (itemset.getValue(node.getDecompositionAttribute()) > node.getDecompositionValueFuzzy(i).getKey() && itemset.getValue(node.getDecompositionAttribute()) < node.getDecompositionValueFuzzy(i).getValue()) {
-                    return (evaluateItemsetFuzzy(itemset, node.getChildren()[i]));
-                }
-
-            }
-            return (evaluateItemsetFuzzy(itemset, node.getChildren()[node.numChildren() - 1]));
-        }
         
         
 
@@ -556,18 +419,9 @@ public class ID3fuzzy extends Algorithm
 		return array;
 	}
         
-        //FUZZY
-        public int indexValueClassPredominant( Vector data, int attribute ) 
-	{
-		int index = -1;
-                String symbol = getCommonClass(data, attribute); //Recoge el valor de CLASE correspondiente
-                index = modelDataset.getAttribute( attribute ).valueIndex( symbol ); //Me da el índice que corresponde a ese valor de clase.
-
-		return index;
-	}
         
         
-
+        
 	/** Function to return the most common class of the itemsets in data.
 	 * 
 	 * @param data 			All the itemsets.
@@ -624,22 +478,8 @@ public class ID3fuzzy extends Algorithm
 		return subset;
 	}
         
-        //FUZZY
-        public void getSubsetFuzzy( Vector<Itemset> data, int attribute, Vector<Vector<Itemset>> subsets_etiquetas){
-            
-            for (int etq = 0; etq < baseD.n_etiquetas; etq++)
-                subsets_etiquetas.add(etq, new Vector());
-            int num = data.size();
-            
-            //Para la variable seleccionada...
-            for (int inst = 0; inst < num; inst++) //Para cada instancia de datos...
-                for (int etq = 0; etq < baseD.n_etiquetas; etq++) //Para cada etiqueta...
-                    if (baseD.gradosPertenencia.get(inst)[attribute][etq] > 0.0) //Si su grado de pertenencia a esa etiqueta es > 0, entonces dicha instancia debe de pertenencer a dicho conjunto de instancias por etiqueta.
-                        subsets_etiquetas.get(etq).add(data.get(inst));
-            
-            
-	}
-
+        
+        
 	/** Function to returns a subset of data, which is the complement of the second argument.
 	 * 
 	 * @param data			The itemsets that where to extract the subset.
@@ -723,20 +563,6 @@ public class ID3fuzzy extends Algorithm
 		
 		return alreadyUsedToDecompose( node.getParent(), attribute, value );
 	}
-        
-        
-        //FUZZY
-        public boolean alreadyUsedToDecomposeFuzzy( Node node, int attribute)
-	{
-		if ( node.getChildren() != null )
-			if ( node.getDecompositionAttribute() == attribute) 
-				return true;
-		if ( node.getParent() == null )
-			return false;
-		
-		return alreadyUsedToDecomposeFuzzy( node.getParent(), attribute);
-	}
-        
         
 
 	/** Function to decompose the specified node.
@@ -841,10 +667,11 @@ public class ID3fuzzy extends Algorithm
                 return itemsets;
 	}
     
-    /** Writes the tree and the results of the training and the test in the file.
-     * 
-     * @throws java.io.IOException If the file cannot be written.
-     */
+        
+        /** Writes the tree and the results of the training and the test in the file.
+        * 
+        * @throws java.io.IOException If the file cannot be written.
+        */
   	public void printResult() throws IOException 
   	{
 	  	long totalTime = ( System.currentTimeMillis() - startTime ) / 1000;
@@ -878,41 +705,9 @@ public class ID3fuzzy extends Algorithm
   	}
         
         
-        public void printResultFuzzy() throws IOException 
-  	{
-	  	long totalTime = ( System.currentTimeMillis() - startTime ) / 1000;
-	  	long seconds = totalTime % 60;
-	  	long minutes = ( ( totalTime - seconds ) % 3600 ) / 60;
-  		String tree = "";
-		PrintWriter resultPrint;
-
-   		tree += writeTreeFuzzy(root, "" );
-   		   		       			
-      tree += "\n@TotalNumberOfNodes " + NumberOfNodes; 
-      tree += "\n@NumberOfLeafs " + NumberOfLeafs; 
-   		
-   		tree += "\n\n@NumberOfItemsetsTraining " + trainDataset.numItemsets(); 
-  		tree += "\n@NumberOfCorrectlyClassifiedTraining " + correct;	  		  		  		  		
-  		tree += "\n@PercentageOfCorrectlyClassifiedTraining " + (float)(correct*100.0)/(float)trainDataset.numItemsets() + "%" ;  		
-  		tree += "\n@NumberOfInCorrectlyClassifiedTraining " + (trainDataset.numItemsets()-correct);
-  		tree += "\n@PercentageOfInCorrectlyClassifiedTraining " + (float)((trainDataset.numItemsets()-correct)*100.0)/(float)trainDataset.numItemsets() + "%" ;
-  		
-		  tree += "\n\n@NumberOfItemsetsTest " + testDataset.numItemsets(); 
-	  	tree += "\n@NumberOfCorrectlyClassifiedTest " + testCorrect;		  		  	
-	  	tree += "\n@PercentageOfCorrectlyClassifiedTest " + (float)(testCorrect*100.0)/(float)testDataset.numItemsets() + "%" ;
-	  	tree += "\n@NumberOfInCorrectlyClassifiedTest " + (testDataset.numItemsets()-testCorrect);		  		  	
-	  	tree += "\n@PercentageOfInCorrectlyClassifiedTest " + (float)((testDataset.numItemsets()-testCorrect)*100.0)/(float)testDataset.numItemsets() + "%" ;
-	  		  	
-	  	tree += "\n\n@ElapsedTime " + ( totalTime - minutes * 60 - seconds ) / 3600 + ":" + minutes / 60 + ":" + seconds;
-
-		resultPrint = new PrintWriter( new FileWriter ( resultFileName ) );
-		resultPrint.print( getHeader() + "\n@decisiontree\n\n" + tree );
-		resultPrint.close();
-  	}
-    
-    /** Evaluates the training dataset and writes the results in the file.
-     * 
-     */
+        /** Evaluates the training dataset and writes the results in the file.
+         * 
+         */
 	public void printTrain()
 	{
 		String text = getHeader();
@@ -947,45 +742,10 @@ public class ID3fuzzy extends Algorithm
    		}
 	}
         
-        //FUZZY
-        public void printTrainFuzzy()
-	{
-		String text = getHeader();
-		for ( int i = 0; i < trainDataset.numItemsets(); i++ )
-		{
-			try
-			{
-				Itemset itemset = trainDataset.itemset( i ); //Recoge el itemset (que toque) del dataset de entrenamiento			
-				int cl = evaluateItemsetFuzzy(itemset, root ); //Evalua ese itemset sacando que valor de clase (numérico) debe de dar respecto al árbol.
-			
-				if ( cl == (int) itemset.getValue( trainDataset.getClassIndex() ) )  //Comprueba que ese valor de clase (numérico) es correcto respecto al que tenía el itemset.
-					correct++;
-			
-				text += trainDataset.getClassAttribute().value( cl ) + " " + 
-				trainDataset.getClassAttribute().value( ( (int) itemset.getClassValue()) ) + "\n"; //Almacena en un string ambos valores de clases obtenidos, para después mostrarlos por fila.
-			}
-			catch ( Exception e )
-			{
-				//System.err.println( e.getMessage() );
-			}
-		}
-		
-   		try 
-		{
-   			PrintWriter print = new PrintWriter( new FileWriter ( trainOutputFileName ) );
-   			print.print( text );
-   			print.close();
-		}
-   		catch ( IOException e )
-		{
-   			System.err.println( "Can not open the training output file: " + e.getMessage() );
-   		}
-	}
         
-	
-    /** Evaluates the test dataset and writes the results in the file.
-     * 
-     */
+        /** Evaluates the test dataset and writes the results in the file.
+         * 
+         */
 	public void printTest()
 	{
 		String text = getHeader();
@@ -1021,44 +781,6 @@ public class ID3fuzzy extends Algorithm
    		}
 	}
         
-        
-        //FUZZY
-        public void printTestFuzzy()
-	{
-		String text = getHeader();
-		
-		for ( int i = 0; i < testDataset.numItemsets(); i++)
-		{
-			try
-			{
-				int cl = (int) evaluateItemsetFuzzy(testDataset.itemset( i ), root );
-				Itemset itemset = testDataset.itemset( i );
-			
-				if ( cl == (int) itemset.getValue( testDataset.getClassIndex() ) ) 
-					testCorrect++;
-			
-				text += testDataset.getClassAttribute().value( ( (int) itemset.getClassValue()) ) + " " + 
-					testDataset.getClassAttribute().value( cl )+ "\n";
-			}
-			catch ( Exception e )
-			{
-				//System.err.println( e.getMessage());
-			}
-		}
-		
-		try 
-		{
-   			PrintWriter print = new PrintWriter( new FileWriter ( testOutputFileName ) );
-   			print.print( text );
-   			print.close();
-		}
-   		catch ( IOException e )
-		{
-   			System.err.println( "Can not open the training output file." );
-   		}
-	}
-        
-        
   
 	/** Main function.
 	 * 
@@ -1075,118 +797,7 @@ public class ID3fuzzy extends Algorithm
    	}
         
         
-    
         
-    /**-------- MÉTODOS PARA EL CÁLCULO DE LAS GANANCIAS DE LOS ATRIBUTOS --------*/
-
-    private void gradosDePertenencia(Vector<Itemset> itemset) {
-        
-        double valor_variable;
-        for (int i = 0; i < itemset.size(); i++) { //Para cada instancia (tupla de datos del dataset)...
-            
-            for (int var = 0; var < itemset.get(i).getDataset().numAttributes()-1; var++){ //Atributos que no sean clase
-                valor_variable = itemset.get(i).getValue(var);
-                baseD.calcularGradosPertenencia(i, var, valor_variable);//Pasar el índice de la variable y su valor.
-            }
-            
-            
-            //Recoger el valor de la CLASE
-            Attribute att = itemset.get(i).getDataset().getAttribute(itemset.get(i).getDataset().numAttributes()-1); //Atributo CLASE
-            String valor_instancia_clase =  att.value( (int)itemset.get(i).values[itemset.get(i).getDataset().numAttributes()-1] ); //TODO: Esto en caso de que siempre sea discreta
-            baseD.addValorClase(i,valor_instancia_clase);
-            
-            
-        }
-    
-    }
-
-    private double calcularEntropia(Vector<Itemset> itemsets, Vector valores_clase) {
-        
-        //1. Recorrer los valores que hay en las instancias de la variable CLASE. Así saber cuántos hay de cada uno.
-        contador_valores_clase(itemsets, valores_clase);
-        
-        //2. Cálculo de la ENTROPÍA GENERAL.
-        double entropia_general = calcularEntropia_general(valores_clase, itemsets);
-        
-        //3. Por cada VARIABLE, para sus correspondientes ETIQUETAS --> Calcular su Entropía.
-        baseD.calcularSumatoriaGradosPertenencia(); //Calcular sumatoria de grados de pertenencia de cada variable-etiqueta 
-        
-        
-        //4. CALCULAR LA SUMATORIA DE GRADOS DE PERTENENCIA DE CADA VARIABLE-ETIQUETA PARA DIVIDIR EN CUANTO SALE LA SUM(G.P.) t.q. SU VALOR DE VARIABLE CLASE SEA EL MISMO
-            //p.e. Si dataset IRIS tiene 3 posibles valores de clase = {iris-versicolor, iris-setosa, iris-virginica} --> Habrá que sacar 3 sumatorias de grados de pertenencia por cada variable-etiqueta.
-        baseD.sumatoria_GP_valorClase(itemsets.size());
-        
-        //5. Calcular las entropías de cada una de las etiquetas POR VARIABLE que existe.
-        baseD.calcularEntropias_var_etq();
-        
-        return entropia_general; //Devuelve la ENTROPÍA GENERAL PARA TODAS LAS VARIABLES
-
-    }
-    
-    
-    private Vector<Pair<Integer,Double>> calcularGanancia(double entropia_general) {
-        baseD.calcularGanancias_var(entropia_general);
-        
-        Vector<Pair<Integer,Double>> v_ord_ganancias = new Vector();
-        Vector<Double> v_ganancias = new Vector(baseD.ganancias_var); //Copiamos el vector de ganancias...
-       
-        Collections.sort(v_ganancias);
-        boolean encontrado;
-        for(int i = v_ganancias.size()-1; i >= 0; i--){
-            encontrado = false;
-            for (int j = 0; j < baseD.ganancias_var.size() && !encontrado; j++){
-                if (baseD.ganancias_var.get(j) == v_ganancias.get(i)){
-                    v_ord_ganancias.addElement(new Pair(j, baseD.ganancias_var.get(j))); //Meter en ORDEN de mayor a menor ganancia, el nºatributo y su ganancia 
-                    encontrado = true;
-                } 
-            }
-        }
-        return v_ord_ganancias;
-    }
-    
-    
-    private void contador_valores_clase(Vector<Itemset> itemsets,Vector valores_clase){
-        for (int i = 0; i < modelDataset.numClasses(); i++){
-            String valor_atributo = modelDataset.getClassAttribute().value(i);
-            valores_clase.addElement(new Pair(valor_atributo,0));
-        }
-        
-        
-        for (int i = 0; i < itemsets.size(); i++) { //Por cada instancia...
-            Attribute att = itemsets.get(i).getDataset().getAttribute(itemsets.get(i).getDataset().numAttributes()-1); //Atributo CLASE
-            String valor_instancia_clase =  att.value( (int)itemsets.get(i).values[itemsets.get(i).getDataset().numAttributes()-1] );
-            
-            for (int j = 0; j < valores_clase.size(); j++){ //Para cada posible valor de clase...
-                Pair<String,Integer> par = (Pair<String, Integer>)valores_clase.get(j);
-                if (par.getKey() == valor_instancia_clase ) //Comprobar si son el mismo valor de clase...
-                    valores_clase.set(j, new Pair(par.getKey(), par.getValue()+1));
-                
-            }
-            
-        }
-        
-    }   
-    
-    
-    private double calcularEntropia_general(Vector valores_clase, Vector<Itemset> itemsets){
-        double entropia_general = 0.0;
-        for (int i = 0; i < modelDataset.numClasses(); i++){
-            Pair<String,Integer> par = (Pair<String, Integer>)valores_clase.get(i);
-            entropia_general -= ((double)par.getValue()/(double)itemsets.size()) * log2((double)par.getValue()/(double)itemsets.size());
-        }
-        return entropia_general;
-    }
-
-    private static double log2(double x){
-        return (double) (Math.log(x) / Math.log(2));
-    }
-    
-    
-    
-    
-    
-    
-    
     
     /**------------- GENERACIÓN DE ARBOL PARA VALORES CONTINUOS Y ENTEROS -----------*/
     
@@ -1243,22 +854,22 @@ public class ID3fuzzy extends Algorithm
                 //6.2.  //Comprobar que no se haya usado ya para descomoponer
                 if ( alreadyUsedToDecomposeFuzzy( node, v_ganancias_ordenado.get(i).getKey()) )
                         continue;
-
-                selectedAttribute = v_ganancias_ordenado.get(i).getKey(); //Ponemos el indice del atributo que indica la división.
+                
+                //6.3. Ponemos el indice del atributo que indica la división.
+                selectedAttribute = v_ganancias_ordenado.get(i).getKey(); 
                 selected = true;
                     
             }
-
-            if ( selected == false ){ //En caso de no seleccionarse ninguno, se empieza a volver hacia atrás en el árbol.
+            
+            //7. En caso de no seleccionarse ninguno, se empieza a volver hacia atrás en el árbol.
+            if ( selected == false ){ 
                 node.setChildren(null);
                 return;
             }
             
 
-            // Dividido el dataset en N conjuntos usando el indice del atributo, ahora se crean los N nodos correspondientes.
+            //8. Dividido el dataset en N conjuntos usando el indice del atributo, ahora se crean los N nodos correspondientes.
             node.setDecompositionAttribute(selectedAttribute); //Indica el indice del atributo que provoca la división.
-            
-            
             Vector<Pair<Double,Double>> v_valueFuzzy = new Vector();
             for (int etq = 0; etq < NumberOfLabs; etq++)
                 v_valueFuzzy.addElement(new Pair(baseD.BaseDatos[selectedAttribute][etq].x0, baseD.BaseDatos[selectedAttribute][etq].x3)); //Almaceno cada uno de los Pares<MIN,MAX> de las etiquetas que provocan la división.
@@ -1287,17 +898,409 @@ public class ID3fuzzy extends Algorithm
             node.setData( null );	
         }
 
-    private boolean proporcionClase(Vector cont_valores_clase) {
+      
         
-        for (int j = 0; j < cont_valores_clase.size(); j++){
-            Pair<String,Integer> par = (Pair<String, Integer>)cont_valores_clase.get(j);
-            if ( (double)((double) par.getValue()/(double)baseD.n_instanicas_inicial) >= PROPORCION_CLASE_NODO)
-                return true;
+    /**-------- MÉTODOS PARA EL CÁLCULO DE LAS GANANCIAS DE LOS ATRIBUTOS --------*/
+
+        private void gradosDePertenencia(Vector<Itemset> itemset) {
+        
+        double valor_variable;
+        for (int i = 0; i < itemset.size(); i++) { //Para cada instancia (tupla de datos del dataset)...
+            
+            for (int var = 0; var < itemset.get(i).getDataset().numAttributes()-1; var++){ //Atributos que no sean clase
+                valor_variable = itemset.get(i).getValue(var);
+                baseD.calcularGradosPertenencia(i, var, valor_variable);//Pasar el índice de la variable y su valor.
+            }
+            
+            
+            //Recoger el valor de la CLASE
+            Attribute att = itemset.get(i).getDataset().getAttribute(itemset.get(i).getDataset().numAttributes()-1); //Atributo CLASE
+            String valor_instancia_clase =  att.value( (int)itemset.get(i).values[itemset.get(i).getDataset().numAttributes()-1] ); //TODO: Esto en caso de que siempre sea discreta
+            baseD.addValorClase(i,valor_instancia_clase);
+            
+            
         }
-        return false;
-        
+    
     }
+
+        private double calcularEntropia(Vector<Itemset> itemsets, Vector valores_clase) {
+
+            //1. Recorrer los valores que hay en las instancias de la variable CLASE. Así saber cuántos hay de cada uno.
+            contador_valores_clase(itemsets, valores_clase);
+
+            //2. Cálculo de la ENTROPÍA GENERAL.
+            double entropia_general = calcularEntropia_general(valores_clase, itemsets);
+
+            //3. Por cada VARIABLE, para sus correspondientes ETIQUETAS --> Calcular su Entropía.
+            baseD.calcularSumatoriaGradosPertenencia(); //Calcular sumatoria de grados de pertenencia de cada variable-etiqueta 
+
+
+            //4. CALCULAR LA SUMATORIA DE GRADOS DE PERTENENCIA DE CADA VARIABLE-ETIQUETA PARA DIVIDIR EN CUANTO SALE LA SUM(G.P.) t.q. SU VALOR DE VARIABLE CLASE SEA EL MISMO
+                //p.e. Si dataset IRIS tiene 3 posibles valores de clase = {iris-versicolor, iris-setosa, iris-virginica} --> Habrá que sacar 3 sumatorias de grados de pertenencia por cada variable-etiqueta.
+            baseD.sumatoria_GP_valorClase(itemsets.size());
+
+            //5. Calcular las entropías de cada una de las etiquetas POR VARIABLE que existe.
+            baseD.calcularEntropias_var_etq();
+
+            return entropia_general; //Devuelve la ENTROPÍA GENERAL PARA TODAS LAS VARIABLES
+
+        }
+
+
+        private Vector<Pair<Integer,Double>> calcularGanancia(double entropia_general) {
+            baseD.calcularGanancias_var(entropia_general);
+
+            Vector<Pair<Integer,Double>> v_ord_ganancias = new Vector();
+            Vector<Double> v_ganancias = new Vector(baseD.ganancias_var); //Copiamos el vector de ganancias...
+
+            Collections.sort(v_ganancias);
+            boolean encontrado;
+            for(int i = v_ganancias.size()-1; i >= 0; i--){
+                encontrado = false;
+                for (int j = 0; j < baseD.ganancias_var.size() && !encontrado; j++){
+                    if (baseD.ganancias_var.get(j) == v_ganancias.get(i)){
+                        v_ord_ganancias.addElement(new Pair(j, baseD.ganancias_var.get(j))); //Meter en ORDEN de mayor a menor ganancia, el nºatributo y su ganancia 
+                        encontrado = true;
+                    } 
+                }
+            }
+            return v_ord_ganancias;
+        }
+
+
+        private void contador_valores_clase(Vector<Itemset> itemsets,Vector valores_clase){
+            for (int i = 0; i < modelDataset.numClasses(); i++){
+                String valor_atributo = modelDataset.getClassAttribute().value(i);
+                valores_clase.addElement(new Pair(valor_atributo,0));
+            }
+
+
+            for (int i = 0; i < itemsets.size(); i++) { //Por cada instancia...
+                Attribute att = itemsets.get(i).getDataset().getAttribute(itemsets.get(i).getDataset().numAttributes()-1); //Atributo CLASE
+                String valor_instancia_clase =  att.value( (int)itemsets.get(i).values[itemsets.get(i).getDataset().numAttributes()-1] );
+
+                for (int j = 0; j < valores_clase.size(); j++){ //Para cada posible valor de clase...
+                    Pair<String,Integer> par = (Pair<String, Integer>)valores_clase.get(j);
+                    if (par.getKey() == valor_instancia_clase ) //Comprobar si son el mismo valor de clase...
+                        valores_clase.set(j, new Pair(par.getKey(), par.getValue()+1));
+
+                }
+
+            }
+
+        }   
+
+
+        private double calcularEntropia_general(Vector valores_clase, Vector<Itemset> itemsets){
+            double entropia_general = 0.0;
+            for (int i = 0; i < modelDataset.numClasses(); i++){
+                Pair<String,Integer> par = (Pair<String, Integer>)valores_clase.get(i);
+                entropia_general -= ((double)par.getValue()/(double)itemsets.size()) * log2((double)par.getValue()/(double)itemsets.size());
+            }
+            return entropia_general;
+        }
+
+        private static double log2(double x){
+            return (double) (Math.log(x) / Math.log(2));
+        }
+
     
     
+        
+        private boolean proporcionClase(Vector cont_valores_clase) {
+
+            for (int j = 0; j < cont_valores_clase.size(); j++){
+                Pair<String,Integer> par = (Pair<String, Integer>)cont_valores_clase.get(j);
+                if ( (double)((double) par.getValue()/(double)baseD.n_instanicas_inicial) >= PROPORCION_CLASE_NODO)
+                    return true;
+            }
+            return false;
+
+        }
+    
+        
+        
+        /** MÉTODOS PARA EL TRAINING, TESTING Y WRITING DEL ÁRBOL GENERADO*/
+    
+        /** *  Function to returns a subset of data.FOR FUZZY ID3.
+	 * 
+	 * @param data			The itemsets that where to extract the subset.
+	 * @param attribute		The attribute to make the division.
+         * @param subsets_etiquetas
+	 */
+        public void getSubsetFuzzy( Vector<Itemset> data, int attribute, Vector<Vector<Itemset>> subsets_etiquetas){
+            int num = data.size();
+            
+            for (int etq = 0; etq < baseD.n_etiquetas; etq++)
+                subsets_etiquetas.add(etq, new Vector());
+
+            for (int inst = 0; inst < num; inst++) //Para cada instancia de datos...
+                for (int etq = 0; etq < baseD.n_etiquetas; etq++) //Para cada etiqueta...
+                    if (baseD.gradosPertenencia.get(inst)[attribute][etq] > 0.0) //Si su grado de pertenencia a esa etiqueta es > 0, entonces dicha instancia debe de pertenencer a dicho conjunto de instancias por etiqueta.
+                        subsets_etiquetas.get(etq).add(data.get(inst));
+            
+            
+	}
+        
+        
+        /**	Function to check if the specified attribute and value are already used to decompose the data. FOR FUZZY ID3.
+	 * 
+	 * @param node			The node to check at this time.
+	 * @param attribute		The attribute to check.
+	 *
+	 * @return				True if the attribute is already used to decompose, 
+	 * 							or false otherwise.
+	 */
+        public boolean alreadyUsedToDecomposeFuzzy( Node node, int attribute)
+	{
+		if ( node.getChildren() != null )
+			if ( node.getDecompositionAttribute() == attribute) 
+				return true;
+		if ( node.getParent() == null )
+			return false;
+		
+		return alreadyUsedToDecomposeFuzzy( node.getParent(), attribute);
+	}
+        
+        
+        
+        /** Function to evaluate the class which the itemset must have according to the classification of the tree. FOR FUZZY ID3.
+	 * 
+	 * @param itemset		The itemset to evaluate.
+	 * @param node			The node that is evaluated at this time.
+	 * 
+	 * @return				The index of the class index predicted.
+	 */
+        public int evaluateItemsetFuzzy(Itemset itemset, Node node) {
+            int outputattr = modelDataset.getClassIndex();
+            boolean correct = false;
+            String aux = null;
+            Attribute classAtt = modelDataset.getClassAttribute();
+            
+            try 
+		{
+      	        	                
+			// if the node is a final leaf
+			if ( node.getChildren() == null ) 
+			{
+				int []values = getAllValues( node.getData(), outputattr );
+			
+				if ( values.length == 1 ) 
+				{				
+					if( values[0] == itemset.getClassValue() )
+					{
+						aux = classAtt.value( values[0] ); //
+						aux = aux + " " + aux + "\n";	
+				 
+						return values[0];
+					}
+					else
+					{
+						aux = classAtt.value( (int)itemset.getClassValue() );
+						aux = aux + " " + classAtt.value(values[0]) + "\n";	 			 
+				 
+						return values[0];
+					}
+				}
+
+				aux = classAtt.value( (int)itemset.getClassValue() );
+				aux = aux + " null\n";
+			
+				return (int)itemset.getClassValue();
+			}
+		}
+            catch ( Exception e)
+            {
+                    return Integer.parseInt( aux.toString() );
+            }
+            
+            
+            // En caso de no ser nodo hoja, llega hast aquí -> Encontrar aquel nodo por el que debe seguir profundizando según el Valor por el que descompone...
+            for (int i = 0; i < node.numChildren() - 1; i++)
+                if (itemset.getValue(node.getDecompositionAttribute()) > node.getDecompositionValueFuzzy(i).getKey() && itemset.getValue(node.getDecompositionAttribute()) < node.getDecompositionValueFuzzy(i).getValue())
+                    return (evaluateItemsetFuzzy(itemset, node.getChildren()[i]));
+            return (evaluateItemsetFuzzy(itemset, node.getChildren()[node.numChildren() - 1]));
+        
+        }
+        
+        
+        /** Evaluates the training dataset and writes the results in the file.
+         * 
+         */
+        public void printTrainFuzzy()
+	{
+		String text = getHeader();
+		for ( int i = 0; i < trainDataset.numItemsets(); i++ )
+		{
+			try
+			{
+				Itemset itemset = trainDataset.itemset( i ); //Recoge el itemset (que toque) del dataset de entrenamiento			
+				int cl = evaluateItemsetFuzzy(itemset, root ); //Evalua ese itemset sacando que valor de clase (numérico) debe de dar respecto al árbol.
+			
+				if ( cl == (int) itemset.getValue( trainDataset.getClassIndex() ) )  //Comprueba que ese valor de clase (numérico) es correcto respecto al que tenía el itemset.
+					correct++;
+			
+				text += trainDataset.getClassAttribute().value( cl ) + " " + 
+				trainDataset.getClassAttribute().value( ( (int) itemset.getClassValue()) ) + "\n"; //Almacena en un string ambos valores de clases obtenidos, para después mostrarlos por fila.
+			}
+			catch ( Exception e )
+			{
+				System.err.println( e.getMessage() );
+			}
+		}
+		
+   		try 
+		{
+   			PrintWriter print = new PrintWriter( new FileWriter ( trainOutputFileName ) );
+   			print.print( text );
+   			print.close();
+		}
+   		catch ( IOException e )
+		{
+   			System.err.println( "Can not open the training output file: " + e.getMessage() );
+   		}
+	}
+        
+	
+        /** Evaluates the test dataset and writes the results in the file.
+         * 
+         */
+        public void printTestFuzzy()
+	{
+		String text = getHeader();
+		
+		for ( int i = 0; i < testDataset.numItemsets(); i++)
+		{
+			try
+			{
+				int cl = (int) evaluateItemsetFuzzy(testDataset.itemset( i ), root );
+				Itemset itemset = testDataset.itemset( i );
+			
+				if ( cl == (int) itemset.getValue( testDataset.getClassIndex() ) ) 
+					testCorrect++;
+			
+				text += testDataset.getClassAttribute().value( ( (int) itemset.getClassValue()) ) + " " + 
+					testDataset.getClassAttribute().value( cl )+ "\n";
+			}
+			catch ( Exception e )
+			{
+				System.err.println( e.getMessage());
+			}
+		}
+		
+		try 
+		{
+   			PrintWriter print = new PrintWriter( new FileWriter ( testOutputFileName ) );
+   			print.print( text );
+   			print.close();
+		}
+   		catch ( IOException e )
+		{
+   			System.err.println( "Can not open the training output file." );
+   		}
+	}
+        
+        
+        /** Function to write the decision tree in the form of rules. FOR FUZZY ID3.
+ 	 * 
+ 	 * @param node		The current node.
+ 	 * @param tab		The indentation of the current rule.
+ 	 * 
+ 	 * @return			The tree in form of rules.
+ 	 */
+        public String writeTreeFuzzy( Node node, String tab ) 
+	{
+		int outputattr = modelDataset.getClassIndex();
+		String cadena = "";
+		Attribute classAtt = modelDataset.getClassAttribute();
+		String attName = classAtt.name();
+
+        try
+        {
+        	// Print a leaf node. 
+        	if ( node.getChildren() == null ) 
+        	{
+        		String value = getCommonClass( node.getData(), outputattr );
+        		
+       			cadena = tab + attName + " = \"" + value + "\"\n";
+       			
+       			/* new */
+       			NumberOfLeafs++;
+       			
+       			return cadena;
+       			
+        	}
+		
+        	// Print a rule. 
+        	cadena += tab + "if( " + modelDataset.getAttribute( node.getDecompositionAttribute() ).name() + 
+				" ==  ["+ node.getDecompositionValueFuzzy(0).getKey() +", "+node.getDecompositionValueFuzzy(0).getValue() +"]  ) then \n";
+        	cadena += tab + "{\n";
+        	if (node.getChildren()[0] != null){
+                    cadena += writeTreeFuzzy( node.getChildren()[0], tab + "\t" );
+                    cadena += tab + "}\n";
+                    NumberOfNodes++;
+                }
+                for (int i = 1; i < node.numDescompositionValueFuzzy(); i++){
+                    if (node.getChildren()[i] != null){
+                        cadena += tab +  "else if ("+ modelDataset.getAttribute( node.getDecompositionAttribute() ).name() +
+                                        " ==  ["+ node.getDecompositionValueFuzzy(i).getKey() +", "+node.getDecompositionValueFuzzy(i).getValue() +"]  ) then \n";
+                        cadena += tab + "{\n";
+                    
+                        cadena +=writeTreeFuzzy( node.getChildren()[i], tab + "\t" );
+                        cadena += tab + "}\n";
+                    }
+                    /* new */
+     		    NumberOfNodes++;
+                }	    
+		
+                NumberOfNodes++;
+
+        	return cadena;
+        }
+        catch( Exception e ){
+            System.out.println( "Error writing tree" );
+        }		
+
+        return cadena;
+	}
+        
+        
+        /** Writes the tree and the results of the training and the test in the file. FOR FUZZY ID3.
+        * 
+        * @throws java.io.IOException If the file cannot be written.
+        */
+        public void printResultFuzzy() throws IOException 
+  	{
+	  	long totalTime = ( System.currentTimeMillis() - startTime ) / 1000;
+	  	long seconds = totalTime % 60;
+	  	long minutes = ( ( totalTime - seconds ) % 3600 ) / 60;
+  		String tree = "";
+		PrintWriter resultPrint;
+
+   		tree += writeTreeFuzzy(root, "" );
+   		   		       			
+                tree += "\n@TotalNumberOfNodes " + NumberOfNodes; 
+                tree += "\n@NumberOfLeafs " + NumberOfLeafs; 
+   		
+   		tree += "\n\n@NumberOfItemsetsTraining " + trainDataset.numItemsets(); 
+  		tree += "\n@NumberOfCorrectlyClassifiedTraining " + correct;	  		  		  		  		
+  		tree += "\n@PercentageOfCorrectlyClassifiedTraining " + (float)(correct*100.0)/(float)trainDataset.numItemsets() + "%" ;  		
+  		tree += "\n@NumberOfInCorrectlyClassifiedTraining " + (trainDataset.numItemsets()-correct);
+  		tree += "\n@PercentageOfInCorrectlyClassifiedTraining " + (float)((trainDataset.numItemsets()-correct)*100.0)/(float)trainDataset.numItemsets() + "%" ;
+  		
+		  tree += "\n\n@NumberOfItemsetsTest " + testDataset.numItemsets(); 
+	  	tree += "\n@NumberOfCorrectlyClassifiedTest " + testCorrect;		  		  	
+	  	tree += "\n@PercentageOfCorrectlyClassifiedTest " + (float)(testCorrect*100.0)/(float)testDataset.numItemsets() + "%" ;
+	  	tree += "\n@NumberOfInCorrectlyClassifiedTest " + (testDataset.numItemsets()-testCorrect);		  		  	
+	  	tree += "\n@PercentageOfInCorrectlyClassifiedTest " + (float)((testDataset.numItemsets()-testCorrect)*100.0)/(float)testDataset.numItemsets() + "%" ;
+	  		  	
+	  	tree += "\n\n@ElapsedTime " + ( totalTime - minutes * 60 - seconds ) / 3600 + ":" + minutes / 60 + ":" + seconds;
+
+		resultPrint = new PrintWriter( new FileWriter ( resultFileName ) );
+		resultPrint.print( getHeader() + "\n@decisiontree\n\n" + tree );
+		resultPrint.close();
+  	}
+        
+	
     
 }//id3fuzzy
