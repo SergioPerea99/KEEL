@@ -365,7 +365,7 @@ public class ID3fuzzy extends Algorithm
 				{				
 					if( values[0] == itemset.getClassValue() )
 					{
-						aux = classAtt.value( values[0] );
+						aux = classAtt.value( values[0] ); //
 						aux = aux + " " + aux + "\n";	
 				 
 						return values[0];
@@ -373,7 +373,7 @@ public class ID3fuzzy extends Algorithm
 					else
 					{
 						aux = classAtt.value( (int)itemset.getClassValue() );
-						aux = aux + " " + classAtt.value(values[0]) + "\n";				 
+						aux = aux + " " + classAtt.value(values[0]) + "\n";	 			 
 				 
 						return values[0];
 					}
@@ -390,7 +390,7 @@ public class ID3fuzzy extends Algorithm
 			return Integer.parseInt( aux.toString() );
       	}
 
-		// Evaluate the children of the node. //TODO: TIENES QUE EVALUAR A TODOS TUS HIJOS (QUE SERÁN N ETIQUETAS = N HIJOS)
+		// Evaluate the children of the node.
 		if( itemset.getValue( node.getDecompositionAttribute() ) == node.getDecompositionValue() )
 			return( evaluateItemset( itemset, node.getChildren()[0] ) );
 		else
@@ -398,62 +398,49 @@ public class ID3fuzzy extends Algorithm
 	}
         
         //FUZZY
-        public int evaluateItemsetFuzzy( Itemset itemset, Node node ) 
-	{		
-		int outputattr = modelDataset.getClassIndex();
-		boolean correct = false;
-		String aux = null;
-		Attribute classAtt = modelDataset.getClassAttribute();
-		
-		try 
-		{
-      	        	                
-			// if the node is a final leaf
-			if ( node.getChildren() == null ) 
-			{
-				int []values = getAllValues( node.getData(), outputattr );
-			
-				if ( values.length == 1 ) 
-				{				
-					if( values[0] == itemset.getClassValue() )
-					{
-						aux = classAtt.value( values[0] );
-						aux = aux + " " + aux + "\n";	
-				 
-						return values[0];
-					}
-					else
-					{
-						aux = classAtt.value( (int)itemset.getClassValue() );
-						aux = aux + " " + classAtt.value(values[0]) + "\n";				 
-				 
-						return values[0];
-					}
-				}
+        public int evaluateItemsetFuzzy(Itemset itemset, Node node) {
+            int outputattr = modelDataset.getClassIndex();
+            boolean correct = false;
+            String aux = null;
+            Attribute classAtt = modelDataset.getClassAttribute();
 
-				aux = classAtt.value( (int)itemset.getClassValue() );
-				aux = aux + " null\n";
-			
-				return (int)itemset.getClassValue();
-			}
-		}
-		catch ( Exception e)
-		{
-			return Integer.parseInt( aux.toString() );
-      	}
+            try {
 
-		// Evaluate the children of the node. //TODO: TIENES QUE EVALUAR A TODOS TUS HIJOS (QUE SERÁN N ETIQUETAS = N HIJOS)
-                for (int i = 0; i < node.numChildren()-1; i++){   
-                    if( itemset.getValue( node.getDecompositionAttribute() ) == node.getDecompositionValue() ){
-                            int valor = ( evaluateItemset( itemset, node.getChildren()[i] ) );
-                            System.out.println("He entrado para evaluar el resultado. valor = "+valor);
-                            return( evaluateItemset( itemset, node.getChildren()[i] ) );
+                // Si el nodo es un nodo HOJA -> Hay que sacar que valor de clase te dice que debe de ser.
+                if (node.getChildren() == null) {
+                    System.out.println("Tamaño conjunto de datos del nodo hoja = " + node.getData().size());
+                    //int []values = getAllValues( node.getData(), outputattr ); //Recojo todos los valores CLASE para el  conjunto de itemset de ese nodo hoja.
+                    int value = indexValueClassPredominant(node.getData(), outputattr);
+
+                    if (value == itemset.getClassValue()) //Comprobamos si ese valor se corresponde con el valor de la clase del itemset pasado por parametro.
+                    {
+                        aux = classAtt.value(value);
+                        aux = aux + " " + aux + "\n";	//Esto sirve para mostrar luego la correspondencia de que tienen el mismo valor de clase.
+                    } else if (value != -1) {
+                        aux = classAtt.value((int) itemset.getClassValue());
+                        aux = aux + " " + classAtt.value(value) + "\n"; //Esto sirve para mostrar luego que NO e tienen el mismo valor de clase.	 
+                    } else {  //En caso de que no se haya retornado ningun indice de valor de clase predominante entre el conjunto de datos de itemsets de este nodo hoja. 
+                        aux = classAtt.value((int) itemset.getClassValue()); //Recoge el valor de la clase
+                        aux = aux + " null\n";
                     }
+                    return value;
                 }
-                int valor = ( evaluateItemset( itemset, node.getChildren()[node.numChildren()-1] ) );
-                System.out.println("He entrado para evaluar el resultado. valor = "+valor);
-                return( evaluateItemset( itemset, node.getChildren()[node.numChildren()-1] ) );
-	}
+            } catch (Exception e) {
+                return Integer.parseInt(aux.toString());
+            }
+
+            // En caso de no ser nodo hoja, llega hast aquí -> Encontrar aquel nodo por el que debe seguir profundizando según el Valor por el que descompone...
+            for (int i = 0; i < node.numChildren() - 1; i++) {
+                //Si el valor en el itemset para ese atributo concreto está entre el intervalo de la etiqueta (del hijo correspondiente)
+                if (itemset.getValue(node.getDecompositionAttribute()) > node.getDecompositionValueFuzzy(i).getKey() && itemset.getValue(node.getDecompositionAttribute()) < node.getDecompositionValueFuzzy(i).getValue()) {
+                    return (evaluateItemsetFuzzy(itemset, node.getChildren()[i]));
+                }
+
+            }
+            return (evaluateItemsetFuzzy(itemset, node.getChildren()[node.numChildren() - 1]));
+        }
+        
+        
 
 	/** Function to return all the values of the specified attribute in the data set.
 	 * 
@@ -467,21 +454,21 @@ public class ID3fuzzy extends Algorithm
 		Vector values = new Vector();
 		int num = data.size();
 		
-		for ( int i = 0; i < num; i++ )
+		for ( int i = 0; i < num; i++ ) //Recorremos todos los itemsets del vector
 		{
-			Itemset current = (Itemset) data.elementAt( i );
-			String symbol = modelDataset.getAttribute( attribute ).value( (int)current.getValue( attribute ) );
-			int index = values.indexOf( symbol );
+			Itemset current = (Itemset) data.elementAt( i ); //Se obtiene el itemset correspondiente.
+			String symbol = modelDataset.getAttribute( attribute ).value( (int)current.getValue( attribute ) ); //Se coge el valor de la CLASE para el itemset recogido.
+			int index = values.indexOf( symbol ); //Recoge si ese valor de CLASE EXISTE YA EN EL VECTOR O NO.
 			
 			if ( index < 0 )
-				values.addElement( symbol );
+				values.addElement( symbol ); //En caso de no existir se añade al vector.
 		}
 
-		int []array = new int[values.size()];
+		int []array = new int[values.size()]; //Se crea un vector con el tamaño de los diferentes VALORES DE CLASE encontrados.
 		
-		for ( int i = 0; i < array.length; i++ )
+		for ( int i = 0; i < array.length; i++ ) //Recorremos el vector...
 		{
-			String symbol = (String)values.elementAt( i );
+			String symbol = (String)values.elementAt( i ); //Recoge el valor de CLASE correspondiente
 			array[i] = modelDataset.getAttribute( attribute ).valueIndex( symbol );
 		}
 		
@@ -489,6 +476,18 @@ public class ID3fuzzy extends Algorithm
 		
 		return array;
 	}
+        
+        //FUZZY
+        public int indexValueClassPredominant( Vector data, int attribute ) 
+	{
+		int index = -1;
+                String symbol = getCommonClass(data, attribute); //Recoge el valor de CLASE correspondiente
+                index = modelDataset.getAttribute( attribute ).valueIndex( symbol ); //Me da el índice que corresponde a ese valor de clase.
+
+		return index;
+	}
+        
+        
 
 	/** Function to return the most common class of the itemsets in data.
 	 * 
@@ -560,7 +559,8 @@ public class ID3fuzzy extends Algorithm
                 for (int etq = 0; etq < baseD.n_etiquetas; etq++) //Para cada etiqueta...
                     if (baseD.gradosPertenencia.get(inst)[attribute][etq] > 0.0) //Si su grado de pertenencia a esa etiqueta es > 0, entonces dicha instancia debe de pertenencer a dicho conjunto de instancias por etiqueta.
                         subsets_etiquetas.get(etq).add(data.get(inst));
-                
+            
+            
 	}
 
 	/** Function to returns a subset of data, which is the complement of the second argument.
@@ -878,14 +878,14 @@ public class ID3fuzzy extends Algorithm
 		{
 			try
 			{
-				Itemset itemset = trainDataset.itemset( i );				
-				int cl = evaluateItemsetFuzzy(itemset, root );
+				Itemset itemset = trainDataset.itemset( i ); //Recoge el itemset (que toque) del dataset de entrenamiento			
+				int cl = evaluateItemsetFuzzy(itemset, root ); //Evalua ese itemset sacando que valor de clase (numérico) debe de dar respecto al árbol.
 			
-				if ( cl == (int) itemset.getValue( trainDataset.getClassIndex() ) ) 
+				if ( cl == (int) itemset.getValue( trainDataset.getClassIndex() ) )  //Comprueba que ese valor de clase (numérico) es correcto respecto al que tenía el itemset.
 					correct++;
 			
 				text += trainDataset.getClassAttribute().value( cl ) + " " + 
-				trainDataset.getClassAttribute().value( ( (int) itemset.getClassValue()) ) + "\n";
+				trainDataset.getClassAttribute().value( ( (int) itemset.getClassValue()) ) + "\n"; //Almacena en un string ambos valores de clases obtenidos, para después mostrarlos por fila.
 			}
 			catch ( Exception e )
 			{
@@ -1170,19 +1170,21 @@ public class ID3fuzzy extends Algorithm
                     
             }
 
-            if ( selected == false ) //En caso de no seleccionarse ninguno, se empieza a volver hacia atrás en el árbol.
+            if ( selected == false ){ //En caso de no seleccionarse ninguno, se empieza a volver hacia atrás en el árbol.
+                node.setChildren(null);
                 return;
+            }
             
 
             // Dividido el dataset en N conjuntos usando el indice del atributo, ahora se crean los N nodos correspondientes.
-            node.setDecompositionAttribute(selectedAttribute);
-            Vector<String> v_valueFuzzy = new Vector();
-            String aniadir;
-            for (int etq = 0; etq < NumberOfLabs; etq++) {
-                aniadir = "["+baseD.BaseDatos[selectedAttribute][etq].x0+", "+baseD.BaseDatos[selectedAttribute][etq].x3+"]";
-                v_valueFuzzy.addElement(aniadir);
-            }
+            node.setDecompositionAttribute(selectedAttribute); //Indica el indice del atributo que provoca la división.
+            
+            
+            Vector<Pair<Double,Double>> v_valueFuzzy = new Vector();
+            for (int etq = 0; etq < NumberOfLabs; etq++)
+                v_valueFuzzy.addElement(new Pair(baseD.BaseDatos[selectedAttribute][etq].x0, baseD.BaseDatos[selectedAttribute][etq].x3)); //Almaceno cada uno de los Pares<MIN,MAX> de las etiquetas que provocan la división.
             node.setDecompositionValueFuzzy(v_valueFuzzy);
+            
             node.setChildren(new Node[subsets_etiquetas_atributo.size()]);
             for (int etq = 0; etq < subsets_etiquetas_atributo.size(); etq++) {
                 node.addChildren(new Node());
@@ -1194,9 +1196,8 @@ public class ID3fuzzy extends Algorithm
                         decomposeFuzzyNode(node.getChildren(etq));
             }
             
-            
             // There is no more any need to keep the original vector.  Release this memory.
-            node.setData(null);
+            node.setData( null );	
         }
 
     private boolean proporcionClase(Vector cont_valores_clase) {

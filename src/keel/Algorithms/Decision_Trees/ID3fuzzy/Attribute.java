@@ -179,7 +179,7 @@ public class Attribute
   	public final String value( int valIndex ) 
 	{
   		if ( !isDiscret() )
-  			return "";
+  			return ""; 
   		else 
   		{
   			Object val = values.elementAt( valIndex );

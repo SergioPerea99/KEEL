@@ -44,10 +44,10 @@ package keel.Algorithms.Decision_Trees.ID3fuzzy;
  */
 public class Itemset 
 {
-	/** The dataset which the itemset has access to. */
-	protected Dataset dataset;		
+    /** The dataset which the itemset has access to. */
+    protected Dataset dataset;		
 	
-	/** Values of the itemset. */
+    /** Values of the itemset. */
     protected double[] values;	
     
     /** The weight of the itemset. */

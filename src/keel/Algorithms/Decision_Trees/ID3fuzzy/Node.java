@@ -38,6 +38,8 @@
 
 package keel.Algorithms.Decision_Trees.ID3fuzzy;
 import java.util.*;
+import javafx.util.Pair;
+
 
 /**
  *  Class to represent a node in the tree
@@ -57,7 +59,7 @@ class Node
 	private int value;
         
         /** If this is not a leaf node, the attribute-value that is used to divide the set of data points (for continuos and integer datasets) */
-        private Vector<String> value_fuzzy;
+        private Vector<Pair<Double,Double>> value_fuzzy;
 	
 	/** If this is not a leaf node, references to the children nodes. */
 	private Node []children;		
@@ -134,7 +136,7 @@ class Node
 	}
         
         //FUZZY
-        public void setDecompositionValueFuzzy( Vector<String> v_value )
+        public void setDecompositionValueFuzzy( Vector<Pair<Double, Double>> v_value )
 	{
 		value_fuzzy = new Vector(v_value);
 	}
@@ -148,7 +150,7 @@ class Node
 	}
         
         //FUZZY
-        public String getDecompositionValueFuzzy(int index)
+        public Pair<Double,Double> getDecompositionValueFuzzy(int index)
 	{
 		return value_fuzzy.get(index);
 	}
