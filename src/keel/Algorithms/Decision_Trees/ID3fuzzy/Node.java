@@ -163,14 +163,24 @@ class Node
 	{
 		children = nodes;
 	}
+        
+        /** Function to set the children of the node.
+	 * 
+	 * @param nodes 	The children of the node.
+	 */
+	public void deleteChildren(int index)
+	{
+		children[index] = null;
+                
+	}
 	
 	/** Function to add a child to the node.
 	 * 
 	 * @param node 	The new child.
 	 */
-	public void addChildren( Node node )
+	public void addChildren(int index, Node node )
 	{
-		children[numChildren()] = node;
+		children[index] = node;
 	}
 	
 	/** Returns the number of children of the node.

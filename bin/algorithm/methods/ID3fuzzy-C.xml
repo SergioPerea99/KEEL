@@ -11,7 +11,7 @@
       <lowerB>1</lowerB>
       <upperB>9</upperB>
     </domain>
-    <default>5</default>
+    <default>3</default>
   </parameter>
 
   <parameter>

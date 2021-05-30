@@ -120,14 +120,19 @@ public class ID3fuzzy extends Algorithm
     		
                 else
                 {
+                    generateFuzzyTree();
+                    printTrainFuzzy();
+                    printTestFuzzy();
+                    printResultFuzzy();
                     
+                    /*
                     // Executes the algorithm.
                     generateTree();
 
                     // Prints the results generates by the algorithm.
                     printTrain();
                     printTest();
-                    printResult();
+                    printResult();*/
 		}
 	    } 
             catch ( Exception e ) 
@@ -366,13 +371,16 @@ public class ID3fuzzy extends Algorithm
                         cadena +=writeTreeFuzzy( node.getChildren()[i], tab + "\t" );
                         cadena += tab + "}\n";
                     }
+                    /* new */
+     		    NumberOfNodes++;
                 }	    
-			    /* new */
-     			NumberOfNodes++;
+			    
 
         	return cadena;
         }
-        catch( Exception e ){}		
+        catch( Exception e ){
+            System.out.println( "Error writing tree" );
+        }		
 
         return cadena;
 	}
@@ -761,7 +769,7 @@ public class ID3fuzzy extends Algorithm
 		node.setDecompositionAttribute( selectedAttribute );
 		node.setDecompositionValue( selectedValue );
 		node.setChildren( new Node [2] );
-		node.addChildren( new Node() );
+		node.addChildren(0, new Node() );
 		node.getChildren( 0 ).setParent( node );
 		node.getChildren( 0 ).setData( getSubset( node.getData(), selectedAttribute, selectedValue ) );
 		node.getChildren()[1] = new Node();
@@ -927,7 +935,7 @@ public class ID3fuzzy extends Algorithm
 			}
 			catch ( Exception e )
 			{
-				System.err.println( e.getMessage() );
+				//System.err.println( e.getMessage() );
 			}
 		}
 		
@@ -1003,7 +1011,7 @@ public class ID3fuzzy extends Algorithm
 			}
 			catch ( Exception e )
 			{
-				System.err.println( e.getMessage());
+				//System.err.println( e.getMessage());
 			}
 		}
 		
@@ -1225,13 +1233,20 @@ public class ID3fuzzy extends Algorithm
             
             node.setChildren(new Node[subsets_etiquetas_atributo.size()]);
             for (int etq = 0; etq < subsets_etiquetas_atributo.size(); etq++) {
-                node.addChildren(new Node());
+                node.addChildren(etq, new Node());
                 node.getChildren(etq).setParent(node);
                 node.getChildren(etq).setData(subsets_etiquetas_atributo.get(etq)); //Subconjunto de datos del nodo hijo 1.
                 
-                if (node.getChildren(etq).getData().size() > (int)0.05*modelDataset.numItemsets()) //Se seguirá descomponiendo si el número de instancias > al 5% de instancias TOTALES desde el inicio de la creación del árbol
-                    if (!proporcionClase(cont_valores_clase))
+                if (node.getChildren(etq).getData().size() > (int)0.05*modelDataset.numItemsets()){//Se seguirá descomponiendo si el número de instancias > al 5% de instancias TOTALES desde el inicio de la creación del árbol
+                    if (!proporcionClase(cont_valores_clase)){
                         decomposeFuzzyNode(node.getChildren(etq));
+                    }else{
+                        node.deleteChildren(etq);
+                    }
+                }else{
+                    node.deleteChildren(etq);
+                }
+                
             }
             
             // There is no more any need to keep the original vector.  Release this memory.
