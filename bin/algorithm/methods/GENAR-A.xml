@@ -1,0 +1,69 @@
+<algorithm_specification>
+  <name>GENAR</name>
+  <nParameters>7</nParameters>
+  <seed>1</seed>
+  <nOutput>1</nOutput>
+  <parameter>
+    <name>Number of Association Rules</name>
+    <type>integer</type>
+    <domain>
+      <lowerB>10</lowerB>
+      <upperB>1000</upperB>
+    </domain>
+    <default>30</default>
+  </parameter>
+  <parameter>
+    <name>Total Number of Evaluations</name>
+    <type>integer</type>
+    <domain>
+      <lowerB>10000</lowerB>
+      <upperB>10000000</upperB>
+    </domain>
+    <default>50000</default>
+  </parameter>
+  <parameter>
+    <name>Population Size</name>
+    <type>integer</type>
+    <domain>
+      <lowerB>10</lowerB>
+      <upperB>1000</upperB>
+    </domain>
+    <default>100</default>
+  </parameter>
+  <parameter>
+    <name>Probability of Selection</name>
+    <type>real</type>
+    <domain>
+      <lowerB>0.0</lowerB>
+      <upperB>1.0</upperB>
+    </domain>
+    <default>0.25</default>
+  </parameter>
+  <parameter>
+    <name>Probability of Mutation</name>
+    <type>real</type>
+    <domain>
+      <lowerB>0.0</lowerB>
+      <upperB>1.0</upperB>
+    </domain>
+    <default>0.1</default>
+  </parameter>    
+  <parameter>
+    <name>Penalization Factor</name>
+    <type>real</type>
+    <domain>
+      <lowerB>0.0</lowerB>
+      <upperB>1.0</upperB>
+    </domain>
+    <default>0.7</default>
+  </parameter>
+  <parameter>
+    <name>Amplitude Factor</name>
+    <type>real</type>
+    <domain>
+      <lowerB>2.0</lowerB>
+      <upperB>20.0</upperB>
+    </domain>
+    <default>2.0</default>
+  </parameter>
+</algorithm_specification>
