@@ -151,4 +151,37 @@ public abstract class Algorithm
      * @throws java.io.IOException If the file cannot be written.
      */
 	protected abstract void printTrain() throws IOException;
+        
+        
+    /** Puts the tokenizer in the first token of the next line.
+     *
+     * @param tokenizer		The tokenizer which reads this function.
+     *
+     * @return				True if reaches the end of file. False otherwise.
+     *
+     * @throws Exception	If cannot read the tokenizer.
+     */
+    protected boolean getNextToken(StreamTokenizer tokenizer) throws Exception {
+        try {
+            if (tokenizer.nextToken() == StreamTokenizer.TT_EOF) {
+                return false;
+            } else {
+                tokenizer.pushBack();
+                while (tokenizer.nextToken() != StreamTokenizer.TT_EOL) {
+                    ;
+                } while (tokenizer.nextToken() == StreamTokenizer.TT_EOL) {
+                    ;
+                }
+
+                if (tokenizer.sval == null) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
+    }
 }

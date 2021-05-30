@@ -103,9 +103,7 @@ public class ID3fuzzy extends Algorithm
 
                 NumberOfNodes = 0;
                 NumberOfLeafs = 0;
-                NumberOfLabs = 3;
-                PROPORCION_CLASE_NODO = 0.8;
-                PORCENTAJE_MIN_EJEMPLOS = 0.05;
+                
                 
     		/*check if there are continous attributes*/
     		if(Attributes.hasRealAttributes() || Attributes.hasIntegerAttributes())
@@ -114,8 +112,6 @@ public class ID3fuzzy extends Algorithm
                     baseD.Semantica(modelDataset);
                     
                     generateFuzzyTree();
-                    
-                    // Prints the results generates by the algorithm.
                     printTrainFuzzy();
                     printTestFuzzy();
                     printResultFuzzy();
@@ -203,17 +199,60 @@ public class ID3fuzzy extends Algorithm
 			}
 
 			/* Reads the names of the output files*/
-			
-			
-				options.nextToken();
-				options.nextToken();
-				trainOutputFileName = options.sval;
-				options.nextToken();
-				
-				testOutputFileName = options.sval;
-				options.nextToken();
-				
-				resultFileName = options.sval;
+			options.nextToken();
+                        options.nextToken();
+                        trainOutputFileName = options.sval;
+                        options.nextToken();
+
+                        testOutputFileName = options.sval;
+                        options.nextToken();
+
+                        resultFileName = options.sval;
+                        
+                        if (!getNextToken(options)) {
+                            return;
+                        }
+
+                        while (options.ttype != StreamTokenizer.TT_EOF) {
+                            
+                            /* Reads the NumberOfLabs parameter */
+                            if (options.sval.equalsIgnoreCase("Labs")) {
+                                options.nextToken();
+                                options.nextToken();
+
+                                if (Integer.parseInt(options.sval) > 0) {
+                                    NumberOfLabs = Integer.parseInt(options.sval);
+                                }
+                            }
+
+                            /* Reads the PROPORCION_CLASE_NODO parameter */
+                            if (options.sval.equalsIgnoreCase("PorcentajeDeClaseNodo")) {
+                                
+                                options.nextToken();
+                                options.nextToken();
+                                
+                                float cf = Float.parseFloat(options.sval);
+
+                                if (cf <= 1 || cf >= 0) {
+                                    PROPORCION_CLASE_NODO = Float.parseFloat(options.sval);
+                                }
+                            }
+
+                            /* Reads PORCENTAJE_MIN_EJEMPLOS parameter */
+                            if (options.sval.equalsIgnoreCase("PorcentajeMINejemplos")) {
+                                
+                                options.nextToken();
+                                options.nextToken();
+                                
+                                float cf = Float.parseFloat(options.sval);
+
+                                if (cf <= 1 || cf >= 0) {
+                                    PORCENTAJE_MIN_EJEMPLOS = Float.parseFloat(options.sval);
+                                }
+                            }
+
+                            getNextToken(options);
+                        }
 				
 		}
 		else
@@ -408,8 +447,7 @@ public class ID3fuzzy extends Algorithm
 
                 // Si el nodo es un nodo HOJA -> Hay que sacar que valor de clase te dice que debe de ser.
                 if (node.getChildren() == null) {
-                    System.out.println("Tamaño conjunto de datos del nodo hoja = " + node.getData().size());
-                    //int []values = getAllValues( node.getData(), outputattr ); //Recojo todos los valores CLASE para el  conjunto de itemset de ese nodo hoja.
+                    
                     int value = indexValueClassPredominant(node.getData(), outputattr);
 
                     if (value == itemset.getClassValue()) //Comprobamos si ese valor se corresponde con el valor de la clase del itemset pasado por parametro.
