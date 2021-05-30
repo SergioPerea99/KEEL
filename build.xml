@@ -1519,6 +1519,15 @@ includes="keel/Algorithms/UnsupervisedLearning/AssociationRules/FuzzyRuleLearnin
              includes="keel/Algorithms/Decision_Trees/ID3/**/*.class"/>
           <fileset dir="${bin}" includes="keel/Dataset/**/*.class"/>
         </jar>
+
+		
+		<jar
+          jarfile="${distMet}/ID3fuzzy.jar"
+          manifest="${src}/keel/Algorithms/Decision_Trees/ID3fuzzy/Manifest">
+          <fileset dir="${bin}"
+             includes="keel/Algorithms/Decision_Trees/ID3fuzzy/**/*.class"/>
+          <fileset dir="${bin}" includes="keel/Dataset/**/*.class"/>
+        </jar>
 		
 		<jar
           jarfile="${distMet}/SLIQ.jar"
