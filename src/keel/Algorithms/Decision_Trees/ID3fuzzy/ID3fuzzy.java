@@ -124,15 +124,7 @@ public class ID3fuzzy extends Algorithm
                     printTrain();
                     printTest();
                     printResult();
-                    
-                    /*
-                    // Executes the algorithm.
-                    generateTree();
 
-                    // Prints the results generates by the algorithm.
-                    printTrain();
-                    printTest();
-                    printResult();*/
 		}
 	    } 
             catch ( Exception e ) 
@@ -1236,22 +1228,24 @@ public class ID3fuzzy extends Algorithm
             //4. Cálculo de la GANANCIA.
             Vector<Pair<Integer,Double>> v_ganancias_ordenado = calcularGanancia(entropia_general);
             
+            //5. Comprobar que existe entropía general para este nodo.
             node.setEntropy( entropia_general );
             if ( node.getEntropy() == 0 )
                     return;
             
-            //  Obtener el atributo que mejor GANANCIA tiene t.q. no haya sido YA seleccionado en sus rama hijo o padres... 
+            //6.  Obtener el atributo que mejor GANANCIA tiene t.q. no haya sido YA seleccionado en sus rama hijo o padres... 
             for ( int i = 0; i < v_ganancias_ordenado.size() && !selected; i++ ) //Para cada atributo...
             {
-                    if ( v_ganancias_ordenado.get(i).getKey() == modelDataset.getClassIndex() ) //Comprobar que no sea un atributo CLASE
-                            continue;
-                    
-                    if ( alreadyUsedToDecomposeFuzzy( node, v_ganancias_ordenado.get(i).getKey()) ) //Comprobar que no se haya usado ya para descomoponer
-                            continue;
+                //6.1. Comprobar que no sea un atributo CLASE
+                if ( v_ganancias_ordenado.get(i).getKey() == modelDataset.getClassIndex() )
+                        continue;
+                
+                //6.2.  //Comprobar que no se haya usado ya para descomoponer
+                if ( alreadyUsedToDecomposeFuzzy( node, v_ganancias_ordenado.get(i).getKey()) )
+                        continue;
 
-                    getSubsetFuzzy(node.getData(), i, subsets_etiquetas_atributo); //Calcular los conjuntos de itemset para cada etiqueta de esta variable.
-                    selectedAttribute = v_ganancias_ordenado.get(i).getKey(); //Ponemos el indice del atributo que indica la división.
-                    selected = true;
+                selectedAttribute = v_ganancias_ordenado.get(i).getKey(); //Ponemos el indice del atributo que indica la división.
+                selected = true;
                     
             }
 
@@ -1270,6 +1264,7 @@ public class ID3fuzzy extends Algorithm
                 v_valueFuzzy.addElement(new Pair(baseD.BaseDatos[selectedAttribute][etq].x0, baseD.BaseDatos[selectedAttribute][etq].x3)); //Almaceno cada uno de los Pares<MIN,MAX> de las etiquetas que provocan la división.
             node.setDecompositionValueFuzzy(v_valueFuzzy);
             
+            getSubsetFuzzy(node.getData(), selectedAttribute, subsets_etiquetas_atributo); //Calcular los conjuntos de itemset para cada etiqueta de esta variable.
             node.setChildren(new Node[subsets_etiquetas_atributo.size()]);
             for (int etq = 0; etq < subsets_etiquetas_atributo.size(); etq++) {
                 node.addChildren(etq, new Node());
