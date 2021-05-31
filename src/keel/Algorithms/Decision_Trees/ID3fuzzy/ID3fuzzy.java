@@ -851,7 +851,7 @@ public class ID3fuzzy extends Algorithm
                 if ( v_ganancias_ordenado.get(i).getKey() == modelDataset.getClassIndex() )
                         continue;
                 
-                //6.2.  //Comprobar que no se haya usado ya para descomoponer
+                //6.2. Comprobar que no se haya usado ya para descomoponer
                 if ( alreadyUsedToDecomposeFuzzy( node, v_ganancias_ordenado.get(i).getKey()) )
                         continue;
                 
@@ -877,12 +877,14 @@ public class ID3fuzzy extends Algorithm
             
             getSubsetFuzzy(node.getData(), selectedAttribute, subsets_etiquetas_atributo); //Calcular los conjuntos de itemset para cada etiqueta de esta variable.
             node.setChildren(new Node[subsets_etiquetas_atributo.size()]);
+            
             for (int etq = 0; etq < subsets_etiquetas_atributo.size(); etq++) {
                 node.addChildren(etq, new Node());
                 node.getChildren(etq).setParent(node);
-                node.getChildren(etq).setData(subsets_etiquetas_atributo.get(etq)); //Subconjunto de datos del nodo hijo 1.
+                node.getChildren(etq).setData(subsets_etiquetas_atributo.get(etq));
                 
-                if (node.getChildren(etq).getData().size() > (int)0.05*modelDataset.numItemsets()){//Se seguirá descomponiendo si el número de instancias > al 5% de instancias TOTALES desde el inicio de la creación del árbol
+                //Se seguirá descomponiendo si el número de instancias > al 5% de instancias TOTALES desde el inicio de la creación del árbol
+                if (node.getChildren(etq).getData().size() > (int)0.05*modelDataset.numItemsets()){
                     if (!proporcionClase(cont_valores_clase)){
                         decomposeFuzzyNode(node.getChildren(etq));
                     }else{
@@ -904,35 +906,35 @@ public class ID3fuzzy extends Algorithm
 
         private void gradosDePertenencia(Vector<Itemset> itemset) {
         
-        double valor_variable;
-        for (int i = 0; i < itemset.size(); i++) { //Para cada instancia (tupla de datos del dataset)...
-            
-            for (int var = 0; var < itemset.get(i).getDataset().numAttributes()-1; var++){ //Atributos que no sean clase
-                valor_variable = itemset.get(i).getValue(var);
-                baseD.calcularGradosPertenencia(i, var, valor_variable);//Pasar el índice de la variable y su valor.
+            double valor_variable;
+            for (int i = 0; i < itemset.size(); i++) { //Para cada instancia (tupla de datos del dataset)...
+
+                for (int var = 0; var < itemset.get(i).getDataset().numAttributes()-1; var++){ //Atributos que no sean clase
+                    valor_variable = itemset.get(i).getValue(var);
+                    baseD.calcularGradosPertenencia(i, var, valor_variable);//Pasar el índice de la variable y su valor.
+                }
+
+
+                //Recoger el valor de la CLASE
+                Attribute att = itemset.get(i).getDataset().getAttribute(itemset.get(i).getDataset().numAttributes()-1); //Atributo CLASE
+                String valor_instancia_clase =  att.value( (int)itemset.get(i).values[itemset.get(i).getDataset().numAttributes()-1] ); 
+                baseD.addValorClase(i,valor_instancia_clase);
+
+
             }
-            
-            
-            //Recoger el valor de la CLASE
-            Attribute att = itemset.get(i).getDataset().getAttribute(itemset.get(i).getDataset().numAttributes()-1); //Atributo CLASE
-            String valor_instancia_clase =  att.value( (int)itemset.get(i).values[itemset.get(i).getDataset().numAttributes()-1] ); //TODO: Esto en caso de que siempre sea discreta
-            baseD.addValorClase(i,valor_instancia_clase);
-            
-            
-        }
     
-    }
+        }
 
         private double calcularEntropia(Vector<Itemset> itemsets, Vector valores_clase) {
 
-            //1. Recorrer los valores que hay en las instancias de la variable CLASE. Así saber cuántos hay de cada uno.
+            //1. Recorrer los valores que hay en las instancias del atributo CLASE. Así saber cuántos hay de cada uno.
             contador_valores_clase(itemsets, valores_clase);
 
             //2. Cálculo de la ENTROPÍA GENERAL.
             double entropia_general = calcularEntropia_general(valores_clase, itemsets);
 
-            //3. Por cada VARIABLE, para sus correspondientes ETIQUETAS --> Calcular su Entropía.
-            baseD.calcularSumatoriaGradosPertenencia(); //Calcular sumatoria de grados de pertenencia de cada variable-etiqueta 
+            //3. Calcular sumatoria de grados de pertenencia de cada variable-etiqueta 
+            baseD.calcularSumatoriaGradosPertenencia(); 
 
 
             //4. CALCULAR LA SUMATORIA DE GRADOS DE PERTENENCIA DE CADA VARIABLE-ETIQUETA PARA DIVIDIR EN CUANTO SALE LA SUM(G.P.) t.q. SU VALOR DE VARIABLE CLASE SEA EL MISMO
@@ -1022,7 +1024,7 @@ public class ID3fuzzy extends Algorithm
         
         /** MÉTODOS PARA EL TRAINING, TESTING Y WRITING DEL ÁRBOL GENERADO*/
     
-        /** *  Function to returns a subset of data.FOR FUZZY ID3.
+        /** *  Function to returns the subsets of data.FOR FUZZY ID3.
 	 * 
 	 * @param data			The itemsets that where to extract the subset.
 	 * @param attribute		The attribute to make the division.

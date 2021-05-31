@@ -138,7 +138,6 @@ public class BaseD {
         
     }
     
-    
     public void addValorClase(int pos_instancia, String valor){
         valores_clase.add(pos_instancia, valor);
     }
